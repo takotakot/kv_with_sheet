@@ -885,3 +885,40 @@ function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key
 
 ここでは、関数の機能を英語で説明するコメントを追加しました。また、一部の変数名を変更し、可読性を向上させるために、コードの一部を再編成しました。
 
+=====
+
+素晴らしいです。次はどの関数が良いですか？
+選んでリファクタリングとコードコメントの追加を行ってください。
+
+=====
+
+前回のリファクタリングで updateDestinationSheet 関数の可読性が上がったので、今回は getRowRangeByValues 関数をリファクタリングしてコメントを追加してみましょう。
+
+=====
+
+お願いします。
+
+=====
+
+```typescript
+/**
+ * Get the range of a row that matches given values in specified columns.
+ * If no such row is found, returns a range for a new row at the bottom of the sheet.
+ * @param sheet - The sheet to search
+ * @param columns - The 1-indexed columns to match values
+ * @param values - The values to match in corresponding columns
+ * @returns The range of the matched row or a new row at the bottom of the sheet
+ */
+function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range {
+  const data = sheet.getDataRange().getValues();
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (columns.every((colIndex, index) => row[colIndex - 1] === values[index])) {
+      return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
+    }
+  }
+  return sheet.getRange(sheet.getLastRow() + 1, 1, 1, sheet.getLastColumn());
+}
+```
+
+コメントを追加し、パラメータと返り値の説明を詳しく記述しました。また、関数名を文言を短縮せずに記述するようにしました。

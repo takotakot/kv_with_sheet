@@ -89,6 +89,14 @@ function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
   return sheet;
 }
 
+/**
+ * Get the range of a row that matches given values in specified columns.
+ * If no such row is found, returns a range for a new row at the bottom of the sheet.
+ * @param sheet - The sheet to search
+ * @param columns - The 1-indexed columns to match values
+ * @param values - The values to match in corresponding columns
+ * @returns The range of the matched row or a new row at the bottom of the sheet
+ */
 function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
