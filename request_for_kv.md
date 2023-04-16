@@ -485,3 +485,80 @@ function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, values: 
 ```
 
 この関数は、指定されたシートからデータを取得し、各行を順番に検索して、指定された values と一致する行を見つけます。見つかった場合は、その行の範囲を返します。見つからない場合は、null を返します。この関数は、先ほど実装した updateDestinationSheet 関数で使用することができます。
+
+=====
+
+実行してみたところ、k1, k2 の下に key1, key2 ではなく、k1, k2 が書き込まれ、k3 の下には何も書き込まれませんでした。v1, v2 の下に value1, value2 は書き込まれたので、大体の動作は合っているように思います。
+修正を加えてくれますか？
+
+=====
+
+申し訳ありません、修正が漏れていました。以下は修正後の updateDestinationSheet 関数です。
+
+```typescript
+function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
+  const headerRowValues = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
+  const keyColumns = Object.keys(data[0].keys).map(key => headerRowValues.indexOf(data[0].keys[key]) + 1); // key columns in destination sheet
+  const valueColumns = Object.keys(data[0].values).map(key => headerRowValues.indexOf(data[0].values[key]) + 1); // value columns in destination sheet
+
+  data.forEach(({keys, values}) => {
+    const rowRange = getRowRangeByValues(keys, keyColumns, destinationSheet);
+    if (rowRange) {
+      // Update existing row
+      valueColumns.forEach((col, i) => {
+        rowRange.getCell(1, col).setValue(values[Object.keys(values)[i]]);
+      });
+    } else {
+      // Add new row
+      const newRow = keyColumns.map((col, i) => values[Object.keys(values)[i]] || ''); // create empty cells for missing values
+      destinationSheet.appendRow([...Object.values(keys), ...newRow]);
+    }
+  });
+}
+```
+
+こちらの修正では、keyColumns と valueColumns の計算を data の最初の要素の keys と values にのみ依存するように変更しています。また、新しい行を追加する場合の値の埋め込み方も修正しています。
+
+=====
+
+getRowRangeByValues 関数の定義が変わったようです。こちらの修正もお願いします。
+
+=====
+
+申し訳ありません、getRowRangeByValues 関数の定義が変わっていたことに気づいていませんでした。以下が修正されたコードです。再度試してみてください。
+
+```typescript
+function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
+  const headerRow = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
+  const keyColumns = headerRow.map((header, index) => data[0].keys[header] ? index + 1 : null).filter(i => i !== null) as number[];
+
+  data.forEach(datum => {
+    const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.findIndex(header => header === valueHeader);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    if (rowRange.getRow() === 0) {
+      destinationSheet.appendRow([...Object.values(datum.keys), ...valuesRow]);
+    } else {
+      rowRange.setValues([valuesRow]);
+    }
+  });
+}
+
+function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range {
+  const data = sheet.getDataRange().getValues();
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    if (columns.every((colIndex, index) => row[colIndex - 1] === values[index])) {
+      return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
+    }
+  }
+  return sheet.getRange(sheet.getLastRow() + 1, 1, 1, sheet.getLastColumn());
+}
+```

@@ -28,24 +28,27 @@ function main(): void {
   updateDestinationSheet(data, sheet);
 }
 
-function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const keyColumns = headers.slice(0, 3);
-  const valueColumns = headers.slice(3);
+function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
+  const headerRow = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
+  const keyColumns = headerRow.map((header, index) => data[0].keys[header] ? index + 1 : null).filter(i => i !== null) as number[];
 
-  for (const row of data) {
-    const rowValues = keyColumns.map(key => row.keys[key]);
-    const rowRange = getRowRangeByValues(sheet, rowValues);
+  data.forEach(datum => {
+    const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
 
-    if (rowRange) {
-      const valueRange = sheet.getRange(rowRange.getRow(), 4, 1, 2);
-      const valueArray = valueColumns.map(column => row.values[column]);
-      valueRange.setValues([valueArray]);
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.findIndex(header => header === valueHeader);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    if (rowRange.getRow() === 0) {
+      destinationSheet.appendRow([...Object.values(datum.keys), ...valuesRow]);
     } else {
-      const newRow = keyColumns.concat(valueColumns.map(column => row.values[column]));
-      sheet.appendRow(newRow);
+      rowRange.setValues([valuesRow]);
     }
-  }
+  });
 }
 
 function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
@@ -59,13 +62,13 @@ function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
   return sheet;
 }
 
-function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, values: any[]): GoogleAppsScript.Spreadsheet.Range | null {
+function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (row.join() === values.join()) {
-      return sheet.getRange(i + 1, 1, 1, row.length);
+    if (columns.every((colIndex, index) => row[colIndex - 1] === values[index])) {
+      return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
     }
   }
-  return null;
+  return sheet.getRange(sheet.getLastRow() + 1, 1, 1, sheet.getLastColumn());
 }
