@@ -1,4 +1,5 @@
 function main(): void {
+  // Define data to be updated in the destination sheet
   const data = [
     {
       "keys": {
@@ -24,7 +25,10 @@ function main(): void {
     }
   ];
 
+  // Get the destination sheet by name
   const sheet = switchSheet("destination");
+
+  // Update the destination sheet with the data
   updateDestinationSheet(data, sheet);
 }
 
@@ -78,14 +82,26 @@ function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key
   });
 }
 
+/**
+ * Gets a Sheet object by its name
+ * 
+ * @param sheetName Name of the sheet to get
+ * @returns Sheet object with the given name
+ * @throws Error if the sheet with the given name does not exist
+ */
 function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+  // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // Get the sheet by its name
   const sheet = ss.getSheetByName(sheetName);
 
+  // Throw an error if the sheet does not exist
   if (!sheet) {
     throw new Error(`Sheet "${sheetName}" not found`);
   }
 
+  // Return the sheet object
   return sheet;
 }
 

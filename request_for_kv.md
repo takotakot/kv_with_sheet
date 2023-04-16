@@ -922,3 +922,138 @@ function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns:
 ```
 
 コメントを追加し、パラメータと返り値の説明を詳しく記述しました。また、関数名を文言を短縮せずに記述するようにしました。
+
+=====
+
+素晴らしいです。次はどの関数が良いですか？
+選んでリファクタリングとコードコメントの追加を行ってください。実際に変更したコードとその説明をしてくれると嬉しいです。
+
+=====
+
+もう一度 main 関数を選んで、リファクタリングとコメントの追加を行いましょう。
+
+以下がリファクタリングとコメントを追加したコードです。
+
+```typescript
+function main(): void {
+  // Define data to be updated in the destination sheet
+  const data = [
+    {
+      "keys": {
+        "k1": "key1",
+        "k2": "key2",
+        "k3": "key3"
+      },
+      "values": {
+        "v1": "value1",
+        "v2": "value2"
+      }
+    },
+    {
+      "keys": {
+        "k1": "key4",
+        "k2": "key5",
+        "k3": "key6"
+      },
+      "values": {
+        "v1": "value3",
+        "v2": "value4"
+      }
+    }
+  ];
+
+  // Get the destination sheet by name
+  const sheet = getSheetByName("destination");
+
+  // Update the destination sheet with the data
+  updateDestinationSheet(data, sheet);
+}
+
+/**
+ * Updates the given destination sheet with the data provided.
+ * 
+ * @param data The data to be updated in the sheet
+ * @param destinationSheet The sheet to be updated
+ */
+function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
+  // Get the header row and determine which columns correspond to the keys
+  const headerRow = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
+  const keyColumns = headerRow.map((header, index) => data[0].keys[header] ? index + 1 : null).filter(i => i !== null) as number[];
+
+  // Loop through each data item and update or append the corresponding row in the sheet
+  data.forEach(datum => {
+    // Get the row range corresponding to the keys in the data item
+    const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
+    
+    // Get the values row of the row range, or an empty array if the range is empty
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+
+    // Update the keys and values in the values row
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {
+      const keyColumn = headerRow.findIndex(header => header === keyHeader);
+      if (keyColumn !== -1) {
+        valuesRow[keyColumn] = key;
+      }
+    });
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.findIndex(header => header === valueHeader);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    // Append a new row or update the existing row with the new values
+    if (rowRange.getRow() === 0) {
+      destinationSheet.appendRow([...Object.values(datum.keys), ...valuesRow]);
+    } else {
+      rowRange.setValues([valuesRow]);
+    }
+  });
+}
+
+/**
+ * Gets the sheet with the given name.
+ * 
+ * @param sheetName The name of the sheet to retrieve
+ * @returns The sheet with the given name
+ * @throws An error if the sheet with the given name is not found
+ */
+function getSheetByName(sheetName: string): GoogleApps
+```
+
+=====
+
+continue
+
+=====
+
+大変失礼しました。では、switchSheet 関数をリファクタリングして、コメントを追加してみましょう。
+
+```typescript
+/**
+ * Gets a Sheet object by its name
+ * 
+ * @param sheetName Name of the sheet to get
+ * @returns Sheet object with the given name
+ * @throws Error if the sheet with the given name does not exist
+ */
+function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+  // Get the active spreadsheet
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // Get the sheet by its name
+  const sheet = ss.getSheetByName(sheetName);
+
+  // Throw an error if the sheet does not exist
+  if (!sheet) {
+    throw new Error(`Sheet "${sheetName}" not found`);
+  }
+
+  // Return the sheet object
+  return sheet;
+}
+```
+
+変更点としては、関数の説明を加えたことと、コードコメントの追加です。switchSheet 関数の目的は、引数で指定された名前のシートオブジェクトを取得することです。そのため、関数の説明として「指定された名前のシートオブジェクトを取得する」という内容を加えました。次に、引数についての説明を加えた上で、戻り値についての説明を加えました。これによって、関数が何を行うのかを明確にすることができます。
+
+また、コードコメントを追加して、それぞれの処理が何を行っているのかを説明しました。これによって、コードの意図が分かりやすくなります。
