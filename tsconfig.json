@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "lib": ["es2019"],
+    "experimentalDecorators": true,
+    // "strictNullChecks": true,
+    // "strictPropertyInitialization": true,
+  },
+}
