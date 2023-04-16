@@ -36,6 +36,13 @@ function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key
     const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
     const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
 
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {  // 追加
+      const keyColumn = headerRow.findIndex(header => header === keyHeader);
+      if (keyColumn !== -1) {
+        valuesRow[keyColumn] = key;
+      }
+    });
+
     Object.entries(datum.values).forEach(([valueHeader, value]) => {
       const valueColumn = headerRow.findIndex(header => header === valueHeader);
       if (valueColumn !== -1) {
