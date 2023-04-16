@@ -28,21 +28,40 @@ function main(): void {
   updateDestinationSheet(data, sheet);
 }
 
+/**
+ * Updates the destination sheet with the provided data.
+ * If a row with the same values for keys exists, updates the existing row.
+ * Otherwise, appends a new row with the keys and values.
+ * 
+ * @param data An array of objects containing "keys" and "values" properties.
+ * @param destinationSheet The sheet to update.
+ */
 function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
+  // Get the header row of the sheet
   const headerRow = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
-  const keyColumns = headerRow.map((header, index) => data[0].keys[header] ? index + 1 : null).filter(i => i !== null) as number[];
+  
+  // Get the columns corresponding to the keys in the data
+  const keyColumns = headerRow
+    .map((header, index) => data[0].keys[header] ? index + 1 : null)
+    .filter(i => i !== null) as number[];
 
+  // Loop through the data and update the sheet
   data.forEach(datum => {
+    // Find the row in the sheet corresponding to the keys in the datum
     const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
+    
+    // Get the existing values in the row, or an empty array if it doesn't exist yet
     const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
 
-    Object.entries(datum.keys).forEach(([keyHeader, key]) => {  // 追加
+    // Update the keys in the values row
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {
       const keyColumn = headerRow.findIndex(header => header === keyHeader);
       if (keyColumn !== -1) {
         valuesRow[keyColumn] = key;
       }
     });
 
+    // Update the values in the values row
     Object.entries(datum.values).forEach(([valueHeader, value]) => {
       const valueColumn = headerRow.findIndex(header => header === valueHeader);
       if (valueColumn !== -1) {
@@ -50,9 +69,10 @@ function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key
       }
     });
 
+    // If the row doesn't exist yet, append a new row with the keys and values
     if (rowRange.getRow() === 0) {
       destinationSheet.appendRow([...Object.values(datum.keys), ...valuesRow]);
-    } else {
+    } else { // Otherwise, update the existing row with the new values
       rowRange.setValues([valuesRow]);
     }
   });
