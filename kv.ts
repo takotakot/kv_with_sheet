@@ -75,25 +75,38 @@ function main(): void {
   updateDestinationSheet(sheet, columnNames, data);
 }
 
-function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, columnNames: ColumnNames, data: Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>): void {
+/**
+ * Update the specified sheet with the given data.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The sheet to update.
+ * @param {ColumnNames} columnNames - The column names mapping object.
+ * @param {Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>} data - The data to update the sheet with.
+ * @throws {Error} Throws an error if any column name is not found in the sheet header row.
+ */
+function updateDestinationSheet(sheet, columnNames, data) {
+  // Get the header row.
   const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
-  // check if all column names exist in header row
+  // Check if all column names exist in header row.
   Object.values(columnNames).forEach(columnName => {
     if (!headerRow.includes(columnName)) {
       throw new Error(`Column ${columnName} not found in sheet header row`);
     }
   });
 
+  // Get the key columns.
   const firstDatum = data[0];
   const keyColumns = Object.entries(columnNames)
     .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
     .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
 
+  // Update the sheet with the data.
   data.forEach(datum => {
+    // Get the row range.
     const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
+    // Get the values row.
     const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
 
+    // Update the keys in the values row.
     Object.entries(datum.keys).forEach(([keyHeader, key]) => {
       const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
       if (keyColumn !== -1) {
@@ -101,6 +114,7 @@ function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, colum
       }
     });
 
+    // Update the values in the values row.
     Object.entries(datum.values).forEach(([valueHeader, value]) => {
       const valueColumn = headerRow.indexOf(columnNames[valueHeader]);
       if (valueColumn !== -1) {
@@ -108,7 +122,9 @@ function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, colum
       }
     });
 
+    // Append a new row if the data row was not found, otherwise update the existing row.
     if (rowRange.getRow() === 0) {
+      // If the data row was not found, append a new row with the keys and values.
       const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
         const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
         if (keyColumn !== -1) {
@@ -118,9 +134,11 @@ function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, colum
       }, Array(headerRow.length).fill(""));
       sheet.appendRow([...keys, ...Object.values(datum.values)]);
     } else {
+      // If the data row was found, update the values in the row.
       rowRange.setValues([valuesRow]);
     }
   });
+  // Note: This function does not return anything, instead it updates the given sheet directly.
 }
 
 /**
