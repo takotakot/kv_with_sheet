@@ -25,58 +25,99 @@ function main(): void {
     }
   ];
 
+  const sheetNames: SheetNames = [
+    {
+      "sheet_id": "kv1",
+      "sheet_name": "destination"
+    }
+  ];
+  
+  const columnNamesList = [
+    {
+      "sheet_id": "kv1",
+      "col_id": "k1",
+      "col_name": "col_name1"
+    },
+    {
+      "sheet_id": "kv1",
+      "col_id": "k2",
+      "col_name": "col_name2"
+    },
+    {
+      "sheet_id": "kv1",
+      "col_id": "k3",
+      "col_name": "col_name3"
+    },
+    {
+      "sheet_id": "kv1",
+      "col_id": "v1",
+      "col_name": "col_name4"
+    },
+    {
+      "sheet_id": "kv1",
+      "col_id": "v2",
+      "col_name": "col_name5"
+    }
+  ];
+
+  const columnNames: ColumnNames = columnNamesList
+    .filter(col => col.sheet_id === "kv1")
+    .reduce((obj, {col_id, col_name}) => {
+          obj[col_id] = col_name;
+          return obj;
+        }, {});
+
   // Get the destination sheet by name
   const sheet = switchSheet("destination");
 
   // Update the destination sheet with the data
-  updateDestinationSheet(data, sheet);
+  // updateDestinationSheet(data, sheet);
+  updateDestinationSheet(sheet, columnNames, data);
 }
 
-/**
- * Updates the destination sheet with the provided data.
- * If a row with the same values for keys exists, updates the existing row.
- * Otherwise, appends a new row with the keys and values.
- * 
- * @param data An array of objects containing "keys" and "values" properties.
- * @param destinationSheet The sheet to update.
- */
-function updateDestinationSheet(data: {keys: {[key: string]: any}, values: {[key: string]: any}}[], destinationSheet: GoogleAppsScript.Spreadsheet.Sheet): void {
-  // Get the header row of the sheet
-  const headerRow = destinationSheet.getRange(1, 1, 1, destinationSheet.getLastColumn()).getValues()[0];
-  
-  // Get the columns corresponding to the keys in the data
-  const keyColumns = headerRow
-    .map((header, index) => data[0].keys[header] ? index + 1 : null)
-    .filter(i => i !== null) as number[];
+function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, columnNames: ColumnNames, data: Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>): void {
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
-  // Loop through the data and update the sheet
+  // check if all column names exist in header row
+  Object.values(columnNames).forEach(columnName => {
+    if (!headerRow.includes(columnName)) {
+      throw new Error(`Column ${columnName} not found in sheet header row`);
+    }
+  });
+
+  const firstDatum = data[0];
+  const keyColumns = Object.entries(columnNames)
+    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+    .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
+
   data.forEach(datum => {
-    // Find the row in the sheet corresponding to the keys in the datum
-    const rowRange = getRowRangeByValues(destinationSheet, keyColumns, Object.values(datum.keys));
-    
-    // Get the existing values in the row, or an empty array if it doesn't exist yet
+    const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
     const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
 
-    // Update the keys in the values row
     Object.entries(datum.keys).forEach(([keyHeader, key]) => {
-      const keyColumn = headerRow.findIndex(header => header === keyHeader);
+      const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
       if (keyColumn !== -1) {
         valuesRow[keyColumn] = key;
       }
     });
 
-    // Update the values in the values row
     Object.entries(datum.values).forEach(([valueHeader, value]) => {
-      const valueColumn = headerRow.findIndex(header => header === valueHeader);
+      const valueColumn = headerRow.indexOf(columnNames[valueHeader]);
       if (valueColumn !== -1) {
         valuesRow[valueColumn] = value;
       }
     });
 
-    // If the row doesn't exist yet, append a new row with the keys and values
     if (rowRange.getRow() === 0) {
-      destinationSheet.appendRow([...Object.values(datum.keys), ...valuesRow]);
-    } else { // Otherwise, update the existing row with the new values
+      const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
+        const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+        if (keyColumn !== -1) {
+          arr[keyColumn] = key;
+        }
+        return arr;
+      }, Array(headerRow.length).fill(""));
+      sheet.appendRow([...keys, ...Object.values(datum.values)]);
+    } else {
       rowRange.setValues([valuesRow]);
     }
   });
