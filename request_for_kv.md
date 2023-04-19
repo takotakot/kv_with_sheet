@@ -2814,3 +2814,278 @@ function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, colum
 columnNamesオブジェクトの各列名をheaderRowから検索し、存在しない場合にはエラーをスローしています。
 
 =====
+
+素晴らしいです。以下のようにして、うまく動きました。ありがとうございます。
+
+この関数を、動作はそのままにしてリファクタリングしたいです。
+絶対に動作は変えないでほしいのですが、どのようにリファクタリングするのが良いでしょうか？
+
+```typescript
+function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, columnNames: ColumnNames, data: Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>): void {
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  // check if all column names exist in header row
+  Object.values(columnNames).forEach(columnName => {
+    if (!headerRow.includes(columnName)) {
+      throw new Error(`Column ${columnName} not found in sheet header row`);
+    }
+  });
+
+  const firstDatum = data[0];
+  const keyColumns = Object.entries(columnNames)
+    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+    .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
+
+  data.forEach(datum => {
+    const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {
+      const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+      if (keyColumn !== -1) {
+        valuesRow[keyColumn] = key;
+      }
+    });
+
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.indexOf(columnNames[valueHeader]);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    if (rowRange.getRow() === 0) {
+      const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
+        const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+        if (keyColumn !== -1) {
+          arr[keyColumn] = key;
+        }
+        return arr;
+      }, Array(headerRow.length).fill(""));
+      sheet.appendRow([...keys, ...Object.values(datum.values)]);
+    } else {
+      rowRange.setValues([valuesRow]);
+    }
+  });
+}
+```
+
+=====
+
+この関数のリファクタリングについては、いくつかの方法が考えられますが、以下のような例を示します。
+
+1. headerRow の取得
+headerRow を取得する部分は、1行目のデータを取得するためのシートのメソッド sheet.getDataRange().getValues()[0] を使用することで、より簡単に記述できます。これにより、余分なコード行数を削減できます。
+```typescript
+const headerRow = sheet.getDataRange().getValues()[0];
+```
+
+2. 列番号の取得
+getColumnNumber() 関数を使用して、列番号を取得することで、コードを簡潔にできます。また、getColumnNumber() 関数を使用することで、indexOf() メソッドの代わりに includes() メソッドを使用することができ、より明確なコードにできます。
+```typescript
+const keyColumns = Object.entries(columnNames)
+  .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+  .map(([col_id, col_name]) => sheet.getRange(1, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].indexOf(col_name) + 1).getColumn());
+```
+
+3. 行の追加
+新しい行を追加する場合、appendRow() メソッドを使用して、新しい行を追加できます。また、getRow() メソッドを使用する代わりに、getRowIndex() メソッドを使用することができます。
+```typescript
+if (rowRange.getRow() === 0) {
+  const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
+    const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+    if (keyColumn !== -1) {
+      arr[keyColumn] = key;
+    }
+    return arr;
+  }, Array(headerRow.length).fill(""));
+  sheet.appendRow([...keys, ...Object.values(datum.values)]);
+} else {
+  rowRange.setValues([valuesRow]);
+}
+```
+これらの変更を加えることで、以下のようなコードになります。
+
+```typescript
+function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, columnNames: ColumnNames, data: Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>): void {
+  const headerRow = sheet.getDataRange().getValues()[0];
+
+  // check if all column names exist in header row
+  Object.values(columnNames).forEach(columnName => {
+    if (!headerRow.includes(columnName)) {
+      throw new Error(`Column ${columnName} not found in sheet header row`);
+    }
+  });
+
+  const firstDatum = data[0];
+  const keyColumns = Object.entries(columnNames)
+    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+    .map(([col_id, col_name]) => sheet.getRange(1, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].indexOf(col_name
+```
+
+=====
+
+ありがとうございます。申し訳ございませんが、あまり良いコードにはなりませんでした。リファクタリングは諦めてコメントの追加のみを行います。
+
+以下のコードに JSDoc を加えてください。また、以下のコードに、実装上注意が必要なポイントに英語でコメント行を加えてください。
+
+```typescript
+function updateDestinationSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet, columnNames: ColumnNames, data: Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>): void {
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  // check if all column names exist in header row
+  Object.values(columnNames).forEach(columnName => {
+    if (!headerRow.includes(columnName)) {
+      throw new Error(`Column ${columnName} not found in sheet header row`);
+    }
+  });
+
+  const firstDatum = data[0];
+  const keyColumns = Object.entries(columnNames)
+    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+    .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
+
+  data.forEach(datum => {
+    const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {
+      const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+      if (keyColumn !== -1) {
+        valuesRow[keyColumn] = key;
+      }
+    });
+
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.indexOf(columnNames[valueHeader]);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    if (rowRange.getRow() === 0) {
+      const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
+        const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+        if (keyColumn !== -1) {
+          arr[keyColumn] = key;
+        }
+        return arr;
+      }, Array(headerRow.length).fill(""));
+      sheet.appendRow([...keys, ...Object.values(datum.values)]);
+    } else {
+      rowRange.setValues([valuesRow]);
+    }
+  });
+}
+```
+
+=====
+
+以下のようにJSDocコメントを追加し、実装上注意が必要なポイントにコメントを追加しました。
+
+```typescript
+/**
+ * Update the specified sheet with the given data.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The sheet to update.
+ * @param {ColumnNames} columnNames - The column names mapping object.
+ * @param {Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>} data - The data to update the sheet with.
+ * @throws {Error} Throws an error if any column name is not found in the sheet header row.
+ */
+function updateDestinationSheet(sheet, columnNames, data) {
+  // Get the header row.
+  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  // Check if all column names exist in header row.
+  Object.values(columnNames).forEach(columnName => {
+    if (!headerRow.includes(columnName)) {
+      throw new Error(`Column ${columnName} not found in sheet header row`);
+    }
+  });
+
+  // Get the key columns.
+  const firstDatum = data[0];
+  const keyColumns = Object.entries(columnNames)
+    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
+    .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
+
+  // Update the sheet with the data.
+  data.forEach(datum => {
+    // Get the row range.
+    const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
+    // Get the values row.
+    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+
+    // Update the keys in the values row.
+    Object.entries(datum.keys).forEach(([keyHeader, key]) => {
+      const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+      if (keyColumn !== -1) {
+        valuesRow[keyColumn] = key;
+      }
+    });
+
+    // Update the values in the values row.
+    Object.entries(datum.values).forEach(([valueHeader, value]) => {
+      const valueColumn = headerRow.indexOf(columnNames[valueHeader]);
+      if (valueColumn !== -1) {
+        valuesRow[valueColumn] = value;
+      }
+    });
+
+    // Append a new row if the data row was not found, otherwise update the existing row.
+    if (rowRange.getRow() === 0) {
+      // If the data row was not found, append a new row with the keys and values.
+      const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
+        const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+        if (keyColumn !== -1) {
+          arr[keyColumn] = key;
+        }
+        return arr;
+      }, Array(headerRow.length).fill(""));
+      sheet.appendRow([...keys, ...Object.values(datum.values)]);
+    } else {
+      // If the data row was found, update the values in the row.
+      rowRange.setValues([valuesRow]);
+    }
+  });
+  // Note: This function does not return anything, instead it updates the given sheet directly.
+}
+```
+
+実装上注意が必要なポイントについては、コメント行を以下のように追加しました：
+
+行 9: 引数columnNamesが、シートのヘッダ行に含まれないカラム名
+
+=====
+
+ありがとうございます。回答が途中から読めなくなってしまいました。もう一度
+
+「実装上注意が必要なポイントについては、コメント行を以下のように追加しました：
+
+行 9: 引数columnNamesが、シートのヘッダ行に含まれないカラム名」
+
+から始めて、その続きを教えてもらえますか？
+
+=====
+
+申し訳ありません。以下に、前回の回答からの続きを示します。
+
+行 9: 引数columnNamesが、シートのヘッダ行に含まれないカラム名
+
+行 11-16: ヘッダ行に全てのカラム名が含まれているかどうかを確認する処理が行われています。
+
+行 18-21: データ配列の最初のデータを取得し、そのキーに対応するカラムのインデックスを取得する処理が行われています。
+
+行 23-40: データを反復処理し、各行の値を更新します。まず、行の範囲を検索して、その行が存在する場合は、行の値を取得します。次に、各キーと値を含むオブジェクトを反復処理し、そのカラムのインデックスを取得して、行の値を更新します。最後に、更新された値を行に設定します。
+
+行 42-51: 行が存在しない場合は、新しい行をシートの末尾に追加し、キーと値を含むデータを挿入します。
+
+=====
+
+素晴らしいです。ありがとうございました。
+
+持ち帰って動作確認を行うので、待っていてください。
+また報告をしに来ます。
+
+=====
+
+承知しました。お待ちしております。何かありましたらいつでもお知らせください。
