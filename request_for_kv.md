@@ -5897,3 +5897,167 @@ for (let i = 1; i < rows.length; i++) {
 ```
 
 にしています。
+
+-----
+A:
+
+いくつかの関数について、JSDoc 形式ではないコメントがありました。
+
+以下の実装を基に、関数の定義を説明する英語の JSDoc コメントを書いてください。
+実装の部分は省いて問題ありません。
+
+```typescript
+  // Constructs a KvConfig object with the specified sheet name.
+  constructor(sheetName: string) {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    this.sheet = ss.getSheetByName(sheetName);
+    this.readFromSheet();
+  }
+```
+
+-----
+B:
+
+Sure, here's an example of a JSDoc comment for the constructor function based on the provided implementation:
+
+```typescript
+/**
+ * Constructs a new KvConfig object with the specified sheet name.
+ *
+ * @param {string} sheetName - The name of the sheet to use as a configuration store.
+ * @returns {void}
+ */
+constructor(sheetName: string) {
+  // ...
+}
+```
+
+This comment describes the constructor function, indicating that it constructs a new KvConfig object and takes a single argument, sheetName. The @param tag is used to document the sheetName parameter, providing a description of its purpose and type. Finally, the @returns tag is used to specify that this function returns nothing (void).
+
+-----
+A:
+
+```typescript
+  // Reads the configuration from the sheet.
+  private readFromSheet(): void {
+    // Splits the sheet into blocks, and processes each block.
+    const blocks = this.splitIntoBlocks();
+    for (const block of blocks) {
+      if (this.isSheetNamesBlock(block)) {
+        this.processSheetNamesBlock(block);
+      } else if (this.isSheetColumnNamesBlock(block)) {
+        this.processSheetColumnNamesBlock(block);
+      }
+    }
+  }
+```
+
+-----
+B:
+
+Here is a JSDoc comment for the readFromSheet function:
+
+```typescript
+/**
+ * Reads the configuration from the sheet by splitting it into blocks and processing each block.
+ * If a block matches the expected format for sheet names, it is processed by the `processSheetNamesBlock` method.
+ * If a block matches the expected format for sheet column names, it is processed by the `processSheetColumnNamesBlock` method.
+ * @returns void
+ */
+private readFromSheet(): void {
+  // Implementation omitted for brevity
+}
+```
+
+The comment explains what the function does, how it works, and what methods it calls depending on the type of block it encounters.
+
+-----
+A:
+
+```typescript
+  // Processes a block of rows representing sheet names and IDs.
+  private processSheetNamesBlock(rows: string[][]): void {
+    // The header row contains the names of the columns.
+    const headerRow = rows[0];
+    const sheetNames = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      // Extract the sheet name and ID from the row.
+      const sheetName = row[headerRow.indexOf("sheet_name")];
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      sheetNames.push({ sheet_id: sheetId, sheet_name: sheetName });
+    }
+    this.sheetNames = sheetNames;
+  }
+```
+
+-----
+B:
+
+Here's an English JSDoc comment for the processSheetNamesBlock function:
+
+```typescript
+/**
+ * Processes a block of rows representing sheet names and IDs.
+ * 
+ * @param {string[][]} rows - The rows to process.
+ * 
+ * @returns {void}
+ */
+```
+And here's an English comment to describe the implementation of the function:
+
+```typescript
+// The function processes the header row to obtain the positions of the "sheet_name" and "sheet_id" columns.
+// It then iterates over the remaining rows, extracting the sheet name and ID from each row.
+// If a row contains only empty cells, it is skipped.
+// The sheet names and IDs are added to the sheetNames array.
+// Finally, the sheetNames property of the object is set to the sheetNames array.
+```
+
+-----
+A:
+
+```typescript
+  // Processes a block of rows representing sheet column names, IDs and names.
+  private processSheetColumnNamesBlock(rows: string[][]): void {
+    // The header row contains the names of the columns.
+    const headerRow = rows[0];
+    const sheetColumns: SheetColumnNames = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      // Extract the sheet ID, column ID and column name from the row.
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      const colId = row[headerRow.indexOf("col_id")];
+      const colName = row[headerRow.indexOf("col_name")];
+      sheetColumns.push({ sheet_id: sheetId, col_id: colId, col_name: colName });
+    }
+
+    this.sheetColumnNames = sheetColumns;
+  }
+```
+
+-----
+B:
+
+Here's the JSDoc comment for the processSheetColumnNamesBlock function:
+
+```typescript
+/**
+ * Processes a block of rows representing sheet column names, IDs and names.
+ * @param {string[][]} rows - A two-dimensional array of strings representing the rows of the block.
+ * @returns {void}
+ */
+```
+
+This function processes a block of rows that represent the column names, IDs, and names of sheets. It takes a two-dimensional array of strings as input, where each element of the outer array represents a row and each element of the inner array represents a cell in that row. The function loops through each row in the block, skips any empty rows, and extracts the sheet ID, column ID, and column name from each non-empty row. It then constructs an array of objects containing this information for each row in the block and assigns this array to the sheetColumnNames property of the object.
+
