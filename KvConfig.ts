@@ -25,6 +25,10 @@ class KvConfig {
     const sheetNames = [];
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
       const sheetName = row[headerRow.indexOf("sheet_name")];
       const sheetId = row[headerRow.indexOf("sheet_id")];
       sheetNames.push({ sheet_id: sheetId, sheet_name: sheetName });
@@ -38,6 +42,10 @@ class KvConfig {
   
     for (let i = 2; i < rows.length; i++) {
       const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
       const sheetId = row[headerRow.indexOf("sheet_id")];
       const colId = row[headerRow.indexOf("col_id")];
       const colName = row[headerRow.indexOf("col_name")];
