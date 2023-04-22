@@ -31,7 +31,7 @@ class KvConfig {
     }
     this.sheetNames = sheetNames;
   }
-  
+
   private processSheetColumnNamesBlock(rows: string[][]): void {
     const headerRow = rows[0];
     const sheetColumns: SheetColumnNames = [];
@@ -53,30 +53,35 @@ class KvConfig {
     const numCols = this.sheet.getLastColumn();
     let currentBlock = [];
     for (let j = 1; j <= numCols; j++) {
-      const column = [];
+      let currentColumn = [];
       for (let i = 1; i <= numRows; i++) {
         const cellValue = this.sheet.getRange(i, j).getValue().toString();
-        column.push(cellValue);
+        currentColumn.push(cellValue);
       }
-      if (column.some((cellValue) => cellValue)) {
+      if (currentColumn.some((cellValue) => cellValue)) {
         // Column has at least one non-empty cell
-        currentBlock.push(column);
+        currentBlock.push(currentColumn);
       } else if (currentBlock.length > 0) {
         // End of block
-        blocks.push(currentBlock);
+        blocks.push(this.transpose(currentBlock));
         currentBlock = [];
       }
     }
     if (currentBlock.length > 0) {
       // Add last block
-      blocks.push(currentBlock);
+      blocks.push(this.transpose(currentBlock));
     }
     return blocks;
+  }
+
+  private transpose(array: any[][]): any[][] {
+    return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
   }
 
   private isSheetNamesBlock(block: string[][]): boolean {
     const expectedColumns = ["sheet_id", "sheet_name"];
     const headerRow = block[0];
+    Logger.log(headerRow);
   
     // 期待するカラム名がすべて含まれているか確認する
     const includesAllColumns = expectedColumns.every((col) =>
