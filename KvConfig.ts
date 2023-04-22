@@ -51,11 +51,13 @@ class KvConfig {
     const blocks = [];
     const numRows = this.sheet.getLastRow();
     const numCols = this.sheet.getLastColumn();
-    const range = this.sheet.getRange(1, 1, numRows, numCols);
-    const values = range.getValues();
-    const transposed = values[0].map((_, c) => values.map((r) => r[c]));
     let currentBlock = [];
-    for (const column of transposed) {
+    for (let j = 1; j <= numCols; j++) {
+      const column = [];
+      for (let i = 1; i <= numRows; i++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        column.push(cellValue);
+      }
       if (column.some((cellValue) => cellValue)) {
         // Column has at least one non-empty cell
         currentBlock.push(column);
