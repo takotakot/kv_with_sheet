@@ -7,7 +7,6 @@ function updateUsingDictionary(dict: { destination: string, data: [keys: any, va
   const kvConfig = kvConfigFactory();
   const sheetNames: SheetNames = kvConfig.getSheetNames();
   const sheetColumnNames: SheetColumnNames = kvConfig.getSheetColumnNames();
-  Logger.log(sheetNames);
 
   const destinationId = dict.destination;
   const destinationSheetName = sheetNames
