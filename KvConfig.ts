@@ -157,7 +157,7 @@ class KvConfig {
   private isSheetNamesBlock(block: string[][]): boolean {
     const expectedColumns = ["sheet_id", "sheet_name"];
     const headerRow = block[0];
-    Logger.log(headerRow);
+    // Logger.log(headerRow);
 
     // Check if all expected columns are present in the header row
     const includesAllColumns = expectedColumns.every((col) =>
