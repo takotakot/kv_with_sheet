@@ -56,7 +56,7 @@ class KvConfig {
     const headerRow = rows[0];
     const sheetColumns: SheetColumnNames = [];
 
-    for (let i = 2; i < rows.length; i++) {
+    for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       // Skip empty rows
       if (row.every((cellValue) => !cellValue)) {
