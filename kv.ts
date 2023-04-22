@@ -32,7 +32,7 @@ function main(): void {
     }
   ];
   
-  const columnNamesList = [
+  const columnNamesList: SheetColumnNames = [
     {
       "sheet_id": "kv1",
       "col_id": "k1",
