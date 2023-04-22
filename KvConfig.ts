@@ -11,14 +11,24 @@ class KvConfig {
   // An array of objects representing the sheet column names, IDs and names.
   private sheetColumnNames: SheetColumnNames = [];
 
-  // Constructs a KvConfig object with the specified sheet name.
+  /**
+   * Constructs a new KvConfig object with the specified sheet name.
+   *
+   * @param {string} sheetName - The name of the sheet to use as a configuration store.
+   * @returns {void}
+   */
   constructor(sheetName: string) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     this.sheet = ss.getSheetByName(sheetName);
     this.readFromSheet();
   }
 
-  // Reads the configuration from the sheet.
+  /**
+   * Reads the configuration from the sheet by splitting it into blocks and processing each block.
+   * If a block matches the expected format for sheet names, it is processed by the `processSheetNamesBlock` method.
+   * If a block matches the expected format for sheet column names, it is processed by the `processSheetColumnNamesBlock` method.
+   * @returns void
+   */
   private readFromSheet(): void {
     // Splits the sheet into blocks, and processes each block.
     const blocks = this.splitIntoBlocks();
@@ -31,7 +41,19 @@ class KvConfig {
     }
   }
 
-  // Processes a block of rows representing sheet names and IDs.
+  /**
+   * Processes a block of rows representing sheet names and IDs.
+   *
+   * The function processes the header row to obtain the positions of the "sheet_name" and "sheet_id" columns.
+   * It then iterates over the remaining rows, extracting the sheet name and ID from each row.
+   * If a row contains only empty cells, it is skipped.
+   * The sheet names and IDs are added to the sheetNames array.
+   * Finally, the sheetNames property of the object is set to the sheetNames array.
+   * 
+   * @param {string[][]} rows - The rows to process.
+   * 
+   * @returns {void}
+   */
   private processSheetNamesBlock(rows: string[][]): void {
     // The header row contains the names of the columns.
     const headerRow = rows[0];
@@ -50,7 +72,11 @@ class KvConfig {
     this.sheetNames = sheetNames;
   }
 
-  // Processes a block of rows representing sheet column names, IDs and names.
+  /**
+   * Processes a block of rows representing sheet column names, IDs and names.
+   * @param {string[][]} rows - A two-dimensional array of strings representing the rows of the block.
+   * @returns {void}
+   */
   private processSheetColumnNamesBlock(rows: string[][]): void {
     // The header row contains the names of the columns.
     const headerRow = rows[0];
