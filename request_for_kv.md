@@ -4866,3 +4866,48 @@ private splitIntoBlocks(): string[][][] {
 ```
 
 この実装では、まずシートの全範囲の値を getValues メソッドで取得し、行列を転置した後、列で分割しています。getValues メソッドは、範囲の左上から右下までのすべてのセルの値を2次元配列で返します。転置を行うために、2次元配列の各行を列として、各列を行として再構成します。
+
+=====
+
+分割はできましたが、`blocks` の中身が転置されていました。
+
+そもそも、ループの順序について row, column であったものを column, row の順に変えることと、転置を行うのと、どちらが良い案でしょうか？
+
+=====
+
+すみません、前回の回答が間違っていました。ご指摘ありがとうございます。
+
+ループの順序を変えることと、転置を行うことで同じ結果が得られますが、一般的には行列を扱う場合、行方向に処理することが多いため、行を内側のループ、列を外側のループとする方が一般的です。従って、行を内側のループ、列を外側のループにする方が自然であると思われます。
+
+以下に修正版のコードを示します。
+
+```typescript
+  private splitIntoBlocks(): string[][][] {
+    const blocks = [];
+    const numRows = this.sheet.getLastRow();
+    const numCols = this.sheet.getLastColumn();
+    let currentBlock = [];
+    for (let j = 1; j <= numCols; j++) {
+      const column = [];
+      for (let i = 1; i <= numRows; i++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        column.push(cellValue);
+      }
+      if (column.some((cellValue) => cellValue)) {
+        // Column has at least one non-empty cell
+        currentBlock.push(column);
+      } else if (currentBlock.length > 0) {
+        // End of block
+        blocks.push(currentBlock);
+        currentBlock = [];
+      }
+    }
+    if (currentBlock.length > 0) {
+      // Add last block
+      blocks.push(currentBlock);
+    }
+    return blocks;
+  }
+```
+
+この修正版では、外側のループを列方向、内側のループを行方向に設定し、列ごとにループを回して各列を column に格納しています。また、currentBlock には column を追加していきます。こうすることで、blocks 内の各ブロックが行列として正しく保持されます。
