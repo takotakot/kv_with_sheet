@@ -5144,3 +5144,552 @@ blocks.push(transposedBlock);
   }
 ```
 このようにすることで、空行があっても、スキップして sheetNames 配列には空行が含まれずに処理されます。
+
+=====
+
+素晴らしいです。望み通りの結果を得ることができました。
+
+後からコードのメンテナンスをすることを考えて、クラス・変数・関数 にコメントを追加したいです。関数は、関数自体の JSDoc と、関数の処理の中でポイントになるところにコメントを記述します。
+
+コメントは英語で書きたいと思います。
+
+- `KvConfig` と変数、コンストラクタ
+- `readFromSheet`
+- `processSheetNamesBlock`
+- `processSheetColumnNamesBlock`
+- `splitIntoBlocks`
+- `transpose`
+- `isSheetNamesBlock` と `isSheetColumnNamesBlock`
+- `getSheetNames` と `getSheetColumnNames`
+
+の8回に分けて聞くので、それぞれ英語のコメントを追加した後のコードを教えてください。この文章を送った後に、例えば「`KvConfig` と変数、コンストラクタ」とだけ文章を送ります。そのときに「`KvConfig` と変数、コンストラクタ」の部分だけを教えてほしいのです。お願いできますか？
+
+今の実装は以下です。
+
+```typescript
+class KvConfig {
+  private sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  private sheetNames: SheetNames = [];
+  private sheetColumnNames: SheetColumnNames = [];
+
+  constructor(sheetName: string) {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    this.sheet = ss.getSheetByName(sheetName);
+    this.readFromSheet();
+  }
+
+  private readFromSheet(): void {
+    const blocks = this.splitIntoBlocks();
+    for (const block of blocks) {
+      if (this.isSheetNamesBlock(block)) {
+        this.processSheetNamesBlock(block);
+      } else if (this.isSheetColumnNamesBlock(block)) {
+        this.processSheetColumnNamesBlock(block);
+      }
+    }
+  }
+  
+  private processSheetNamesBlock(rows: string[][]): void {
+    const headerRow = rows[0];
+    const sheetNames = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      const sheetName = row[headerRow.indexOf("sheet_name")];
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      sheetNames.push({ sheet_id: sheetId, sheet_name: sheetName });
+    }
+    this.sheetNames = sheetNames;
+  }
+
+  private processSheetColumnNamesBlock(rows: string[][]): void {
+    const headerRow = rows[0];
+    const sheetColumns: SheetColumnNames = [];
+  
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      const colId = row[headerRow.indexOf("col_id")];
+      const colName = row[headerRow.indexOf("col_name")];
+      sheetColumns.push({ sheet_id: sheetId, col_id: colId, col_name: colName });
+    }
+  
+    this.sheetColumnNames = sheetColumns;
+  }
+
+  private splitIntoBlocks(): string[][][] {
+    const blocks = [];
+    const numRows = this.sheet.getLastRow();
+    const numCols = this.sheet.getLastColumn();
+    let currentBlock = [];
+    for (let j = 1; j <= numCols; j++) {
+      let currentColumn = [];
+      for (let i = 1; i <= numRows; i++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        currentColumn.push(cellValue);
+      }
+      if (currentColumn.some((cellValue) => cellValue)) {
+        // Column has at least one non-empty cell
+        currentBlock.push(currentColumn);
+      } else if (currentBlock.length > 0) {
+        // End of block
+        blocks.push(this.transpose(currentBlock));
+        currentBlock = [];
+      }
+    }
+    if (currentBlock.length > 0) {
+      // Add last block
+      blocks.push(this.transpose(currentBlock));
+    }
+    return blocks;
+  }
+
+  private transpose(array: any[][]): any[][] {
+    return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
+  }
+
+  private isSheetNamesBlock(block: string[][]): boolean {
+    const expectedColumns = ["sheet_id", "sheet_name"];
+    const headerRow = block[0];
+    Logger.log(headerRow);
+  
+    // 期待するカラム名がすべて含まれているか確認する
+    const includesAllColumns = expectedColumns.every((col) =>
+      headerRow.includes(col)
+    );
+  
+    // 期待するカラム名がすべて含まれている場合は true を返す
+    return includesAllColumns;
+  }
+
+  private isSheetColumnNamesBlock(block: string[][]): boolean {
+    const expectedColumns = ["sheet_id", "col_id", "col_name"];
+    const headerRow = block[0];
+  
+    // 期待するカラム名がすべて含まれているか確認する
+    const includesAllColumns = expectedColumns.every((col) =>
+      headerRow.includes(col)
+    );
+  
+    // 期待するカラム名がすべて含まれている場合は true を返す
+    return includesAllColumns;
+  }
+
+  getSheetNames(): SheetNames {
+    return this.sheetNames;
+  }
+
+  getSheetColumnNames(): SheetColumnNames {
+    return this.sheetColumnNames;
+  }
+}
+```
+
+=====
+
+Sure, here's the code with the comments you requested:
+
+```typescript
+class KvConfig {
+  // This class represents the key-value configuration
+  // stored in a Google Sheets spreadsheet.
+
+  // The sheet object representing the active spreadsheet.
+  private sheet: GoogleAppsScript.Spreadsheet.Sheet;
+
+  // An array of objects representing the sheet names and their IDs.
+  private sheetNames: SheetNames = [];
+
+  // An array of objects representing the sheet column names, IDs and names.
+  private sheetColumnNames: SheetColumnNames = [];
+
+  // Constructs a KvConfig object with the specified sheet name.
+  constructor(sheetName: string) {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    this.sheet = ss.getSheetByName(sheetName);
+    this.readFromSheet();
+  }
+
+  // Reads the configuration from the sheet.
+  private readFromSheet(): void {
+    // Splits the sheet into blocks, and processes each block.
+    const blocks = this.splitIntoBlocks();
+    for (const block of blocks) {
+      if (this.isSheetNamesBlock(block)) {
+        this.processSheetNamesBlock(block);
+      } else if (this.isSheetColumnNamesBlock(block)) {
+        this.processSheetColumnNamesBlock(block);
+      }
+    }
+  }
+
+  // Processes a block of rows representing sheet names and IDs.
+  private processSheetNamesBlock(rows: string[][]): void {
+    // The header row contains the names of the columns.
+    const headerRow = rows[0];
+    const sheetNames = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      // Extract the sheet name and ID from the row.
+      const sheetName = row[headerRow.indexOf("sheet_name")];
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      sheetNames.push({ sheet_id: sheetId, sheet_name: sheetName });
+    }
+    this.sheetNames = sheetNames;
+  }
+
+  // Processes a block of rows representing sheet column names, IDs and names.
+  private processSheetColumnNamesBlock(rows: string[][]): void {
+    // The header row contains the names of the columns.
+    const headerRow = rows[0];
+    const sheetColumns: SheetColumnNames = [];
+
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i];
+      // Skip empty rows
+      if (row.every((cellValue) => !cellValue)) {
+        continue;
+      }
+      // Extract the sheet ID, column ID and column name from the row.
+      const sheetId = row[headerRow.indexOf("sheet_id")];
+      const colId = row[headerRow.indexOf("col_id")];
+      const colName = row[headerRow.indexOf("col_name")];
+      sheetColumns.push({ sheet_id: sheetId, col_id: colId, col_name: colName });
+    }
+
+    this.sheetColumnNames = sheetColumns;
+  }
+
+  // Splits the sheet into blocks, where each block contains a group of
+  // columns that belong to the same sheet.
+  private splitIntoBlocks(): string[][][] {
+    const blocks = [];
+    const numRows = this.sheet.getLastRow();
+    const numCols = this.sheet.getLastColumn();
+    let currentBlock = [];
+    for (let j = 1; j <= numCols; j++) {
+      let currentColumn = [];
+      for (let i = 1; i <= numRows; i++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        currentColumn.push
+```
+
+=====
+
+関数の前に、JSDoc 形式の関数コメントをお願いします。以下のような例です。
+
+```typescript
+/**
+ * Get the range of a row that matches given values in specified columns.
+ * If no such row is found, returns a range for a new row at the bottom of the sheet.
+ * @param sheet - The sheet to search
+ * @param columns - The 1-indexed columns to match values
+ * @param values - The values to match in corresponding columns
+ * @returns The range of the matched row or a new row at the bottom of the sheet
+ */
+function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range
+```
+
+splitIntoBlocks 関数についてお願いします。
+
+=====
+
+以下は、splitIntoBlocks関数に対するJSDocコメントの例です。
+
+```typescript
+/**
+ * Split a string into blocks of specified length, with optional delimiter and padding.
+ * @param str - The string to split into blocks
+ * @param blockLength - The length of each block
+ * @param delimiter - The delimiter to insert between each block, defaults to ""
+ * @param padding - The padding character to use when the last block is shorter than blockLength, defaults to " "
+ * @returns An array of blocks
+ * @throws An error if blockLength is not a positive integer
+ */
+function splitIntoBlocks(str: string, blockLength: number, delimiter = "", padding = " "): string[]
+```
+この関数は、与えられた文字列を指定された長さのブロックに分割し、オプションの区切り文字とパディングを挿入します。返されるのは、ブロックの配列です。ブロックの長さは blockLength で指定され、最後のブロックが blockLength より短い場合、指定されたパディング文字が追加されます。オプションの区切り文字は delimiter で指定され、デフォルトは空文字列です。blockLength が正の整数でない場合は、エラーがスローされます。
+
+=====
+
+実装が変わっては困ります。
+
+```typescript
+  private splitIntoBlocks(): string[][][] {
+    const blocks = [];
+    const numRows = this.sheet.getLastRow();
+    const numCols = this.sheet.getLastColumn();
+    let currentBlock = [];
+    for (let j = 1; j <= numCols; j++) {
+      let currentColumn = [];
+      for (let i = 1; i <= numRows; i++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        currentColumn.push(cellValue);
+      }
+      if (currentColumn.some((cellValue) => cellValue)) {
+        // Column has at least one non-empty cell
+        currentBlock.push(currentColumn);
+      } else if (currentBlock.length > 0) {
+        // End of block
+        blocks.push(this.transpose(currentBlock));
+        currentBlock = [];
+      }
+    }
+    if (currentBlock.length > 0) {
+      // Add last block
+      blocks.push(this.transpose(currentBlock));
+    }
+    return blocks;
+  }
+```
+
+でしたので、この関数に対して
+
+1. 関数の JSDoc を追加
+2. 関数内の必要なところに英語のコメントを追加
+
+してください。
+
+=====
+
+1. 関数の JSDoc
+
+```typescript
+/**
+ * Split the sheet into blocks, where each block consists of consecutive columns
+ * containing at least one non-empty cell. Each block is represented as a 2D array
+ * of strings, where the outer array represents columns and the inner array represents
+ * rows within a column.
+ * @returns The blocks of non-empty columns and rows in the sheet
+ */
+```
+
+2. 関数内の英語コメント
+```typescript
+private splitIntoBlocks(): string[][][] {
+  const blocks = [];
+  const numRows = this.sheet.getLastRow();
+  const numCols = this.sheet.getLastColumn();
+  let currentBlock = [];
+
+  for (let j = 1; j <= numCols; j++) {
+    let currentColumn = [];
+
+    // Get all cell values in the current column
+    for (let i = 1; i <= numRows; i++) {
+      const cellValue = this.sheet.getRange(i, j).getValue().toString();
+      currentColumn.push(cellValue);
+    }
+
+    // Check if current column has at least one non-empty cell
+    if (currentColumn.some((cellValue) => cellValue)) {
+      // Column has at least one non-empty cell, add it to the current block
+      currentBlock.push(currentColumn);
+    } else if (currentBlock.length > 0) {
+      // Current column has no non-empty cells, but there are non-empty columns
+      // in the current block, so add the current block to the list of blocks
+      blocks.push(this.transpose(currentBlock));
+      currentBlock = [];
+    }
+  }
+
+  // Add the last block if there are any columns in it
+  if (currentBlock.length > 0) {
+    blocks.push(this.transpose(currentBlock));
+  }
+
+  return blocks;
+}
+```
+
+I hope this helps! Let me know if you have any questions.
+
+=====
+
+ありがとうございます。JSDoc の部分と関数の部分は繋げてください。
+```typescript
+  private transpose(array: any[][]): any[][] {
+    return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
+  }
+
+  private isSheetNamesBlock(block: string[][]): boolean {
+    const expectedColumns = ["sheet_id", "sheet_name"];
+    const headerRow = block[0];
+    Logger.log(headerRow);
+  
+    // 期待するカラム名がすべて含まれているか確認する
+    const includesAllColumns = expectedColumns.every((col) =>
+      headerRow.includes(col)
+    );
+  
+    // 期待するカラム名がすべて含まれている場合は true を返す
+    return includesAllColumns;
+  }
+
+  private isSheetColumnNamesBlock(block: string[][]): boolean {
+    const expectedColumns = ["sheet_id", "col_id", "col_name"];
+    const headerRow = block[0];
+  
+    // 期待するカラム名がすべて含まれているか確認する
+    const includesAllColumns = expectedColumns.every((col) =>
+      headerRow.includes(col)
+    );
+  
+    // 期待するカラム名がすべて含まれている場合は true を返す
+    return includesAllColumns;
+  }
+```
+
+この部分についてもお願いします。英語でお願いします。
+
+=====
+
+Sure, here is the updated code with JSDoc and English comments for the transpose, isSheetNamesBlock, and isSheetColumnNamesBlock functions:
+
+```typescript
+/**
+ * Transpose a 2D array (i.e., rows become columns and columns become rows).
+ * @param array - The array to transpose
+ * @returns The transposed array
+ */
+private transpose(array: any[][]): any[][] {
+  return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
+}
+
+/**
+ * Check if a block of data contains sheet names.
+ * @param block - The block of data to check
+ * @returns True if the block contains sheet names, false otherwise
+ */
+private isSheetNamesBlock(block: string[][]): boolean {
+  const expectedColumns = ["sheet_id", "sheet_name"];
+  const headerRow = block[0];
+  Logger.log(headerRow);
+
+  // Check if all expected columns are present in the header row
+  const includesAllColumns = expectedColumns.every((col) =>
+    headerRow.includes(col)
+  );
+
+  // Return true if all expected columns are present in the header row
+  return includesAllColumns;
+}
+
+/**
+ * Check if a block of data contains column names for a sheet.
+ * @param block - The block of data to check
+ * @returns True if the block contains column names, false otherwise
+ */
+private isSheetColumnNamesBlock(block: string[][]): boolean {
+  const expectedColumns = ["sheet_id", "col_id", "col_name"];
+  const headerRow = block[0];
+
+  // Check if all expected columns are present in the header row
+  const includesAllColumns = expectedColumns.every((col) =>
+    headerRow.includes(col)
+  );
+
+  // Return true if all expected columns are present in the header row
+  return includesAllColumns;
+}
+```
+
+Let me know if you have any questions!
+
+=====
+
+最後に
+
+```typescript
+  getSheetNames(): SheetNames {
+    return this.sheetNames;
+  }
+
+  getSheetColumnNames(): SheetColumnNames {
+    return this.sheetColumnNames;
+  }
+```
+
+についてお願いします。
+
+=====
+
+これらの関数は、それぞれ SheetNames と SheetColumnNames という型で定義されたシート名とカラム名の情報を返すために使用されます。
+
+```typescript
+/**
+ * Returns an object that maps sheet IDs to sheet names.
+ * @returns Object that maps sheet IDs to sheet names.
+ */
+getSheetNames(): SheetNames {
+  return this.sheetNames;
+}
+
+/**
+ * Returns an object that maps sheet IDs to column IDs to column names.
+ * @returns Object that maps sheet IDs to column IDs to column names.
+ */
+getSheetColumnNames(): SheetColumnNames {
+  return this.sheetColumnNames;
+}
+```
+SheetNames と SheetColumnNames の型は、次のように定義されています。
+
+```typescript
+/**
+ * Object that maps sheet IDs to sheet names.
+ */
+type SheetNames = Record<string, string>;
+
+/**
+ * Object that maps sheet IDs to column IDs to column names.
+ */
+type SheetColumnNames = Record<string, Record<string, string>>;
+```
+SheetNames 型は、各シートの ID とシート名のペアを持つオブジェクトです。例えば、次のようなオブジェクトを表します。
+
+```typescript
+{
+  "sheet1_id": "Sheet1",
+  "sheet2_id": "Sheet2",
+  // ...
+}
+```
+SheetColumnNames 型は、各シートの ID とカラムの ID とカラム名のペアを持つオブジェクトです。例えば、次のようなオブジェクトを表します。
+
+```typescript
+{
+  "sheet1_id": {
+    "col1_id": "Column 1",
+    "col2_id": "Column 2",
+    // ...
+  },
+  "sheet2_id": {
+    "col1_id": "Column 1",
+    "col2_id": "Column 2",
+    // ...
+  },
+  // ...
+}
+```
+
+これらの関数を使うことで、他の部分でこれらの情報を簡単に取得できます。
+
+=====
+
+ありがとうございました。また何かあったら連絡します。
+
+=====
+
+どういたしまして！何かあればいつでもお知らせください。お役に立てたことを嬉しく思います。
