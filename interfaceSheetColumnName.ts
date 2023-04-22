@@ -1,7 +1,7 @@
 interface SheetColumnName {
-  sheet_id: string;
-  col_id: string;
-  col_name: string;
+  sheetId: string;
+  colId: string;
+  colName: string;
 }
 
 type SheetColumnNames = SheetColumnName[];

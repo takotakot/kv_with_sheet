@@ -1,6 +1,6 @@
 interface SheetName {
-  sheet_id: string;
-  sheet_name: string;
+  sheetId: string;
+  sheetName: string;
 }
 
 type SheetNames = SheetName[];

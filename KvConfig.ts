@@ -67,7 +67,7 @@ class KvConfig {
       // Extract the sheet name and ID from the row.
       const sheetName = row[headerRow.indexOf("sheet_name")];
       const sheetId = row[headerRow.indexOf("sheet_id")];
-      sheetNames.push({ sheet_id: sheetId, sheet_name: sheetName });
+      sheetNames.push({ sheetId, sheetName });
     }
     this.sheetNames = sheetNames;
   }
@@ -92,7 +92,7 @@ class KvConfig {
       const sheetId = row[headerRow.indexOf("sheet_id")];
       const colId = row[headerRow.indexOf("col_id")];
       const colName = row[headerRow.indexOf("col_name")];
-      sheetColumns.push({ sheet_id: sheetId, col_id: colId, col_name: colName });
+      sheetColumns.push({ sheetId, colId, colName });
     }
 
     this.sheetColumnNames = sheetColumns;

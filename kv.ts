@@ -11,14 +11,14 @@ function updateUsingDictionary(dict: { destination: string, data: [keys: any, va
 
   const destinationId = dict.destination;
   const destinationSheetName = sheetNames
-  .filter(sheetPointer => sheetPointer.sheet_id === destinationId)
-  [0].sheet_name;
+  .filter(sheetPointer => sheetPointer.sheetId === destinationId)
+  [0].sheetName;
   const sheet = switchSheet(destinationSheetName);
   
   const columnNames: ColumnNames = sheetColumnNames
-    .filter(col => col.sheet_id === destinationId)
-    .reduce((obj, {col_id, col_name}) => {
-          obj[col_id] = col_name;
+    .filter(col => col.sheetId === destinationId)
+    .reduce((obj, {colId, colName}) => {
+          obj[colId] = colName;
           return obj;
         }, {});
 
@@ -55,8 +55,8 @@ function updateDestinationSheet(sheet, columnNames, data) {
   // Get the key columns.
   const firstDatum = data[0];
   const keyColumns = Object.entries(columnNames)
-    .filter(([col_id, col_name]) => Object.keys(firstDatum.keys).includes(col_id))
-    .map(([col_id, col_name]) => headerRow.indexOf(col_name) + 1);
+    .filter(([colId, colName]) => Object.keys(firstDatum.keys).includes(colId))
+    .map(([colId, colName]) => headerRow.indexOf(colName) + 1);
 
   // Update the sheet with the data.
   data.forEach(datum => {

@@ -33,9 +33,9 @@ function testKv(): void {
   ];
 
   const columnNames: ColumnNames = sheetColumnNames
-    .filter(col => col.sheet_id === "kv1")
-    .reduce((obj, {col_id, col_name}) => {
-          obj[col_id] = col_name;
+    .filter(col => col.sheetId === "kv1")
+    .reduce((obj, {colId, colName}) => {
+          obj[colId] = colName;
           return obj;
         }, {});
 
