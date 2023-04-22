@@ -4800,3 +4800,69 @@ private isSheetNamesBlock(block: string[][]): boolean {
 =====
 
 はい、問題ありません。必要ならば何か質問があれば遠慮なくお聞きください。
+
+=====
+
+```typescript
+  private splitIntoBlocks(): string[][][] {
+    const blocks = [];
+    const numRows = this.sheet.getLastRow();
+    const numCols = this.sheet.getLastColumn();
+    let currentBlock = [];
+    for (let i = 1; i <= numRows; i++) {
+      const row = [];
+      for (let j = 1; j <= numCols; j++) {
+        const cellValue = this.sheet.getRange(i, j).getValue().toString();
+        row.push(cellValue);
+      }
+      if (row.some((cellValue) => cellValue)) {
+        // Row has at least one non-empty cell
+        currentBlock.push(row);
+      } else if (currentBlock.length > 0) {
+        // End of block
+        blocks.push(currentBlock);
+        currentBlock = [];
+      }
+    }
+    if (currentBlock.length > 0) {
+      // Add last block
+      blocks.push(currentBlock);
+    }
+    return blocks;
+  }
+```
+
+この実装が誤っていると思いました。行 つまり row で分割しているようです。分割したかったのは 列 つまり column です。修正をお願いします。
+
+=====
+
+申し訳ありません、確かに splitIntoBlocks メソッドは列ではなく行で分割していました。修正方法はいくつかありますが、以下のように transpose メソッドを使用して行列を転置することで、列で分割することができます。
+
+```typescript
+private splitIntoBlocks(): string[][][] {
+  const blocks = [];
+  const numRows = this.sheet.getLastRow();
+  const numCols = this.sheet.getLastColumn();
+  const range = this.sheet.getRange(1, 1, numRows, numCols);
+  const values = range.getValues();
+  const transposed = values[0].map((_, c) => values.map((r) => r[c]));
+  let currentBlock = [];
+  for (const column of transposed) {
+    if (column.some((cellValue) => cellValue)) {
+      // Column has at least one non-empty cell
+      currentBlock.push(column);
+    } else if (currentBlock.length > 0) {
+      // End of block
+      blocks.push(currentBlock);
+      currentBlock = [];
+    }
+  }
+  if (currentBlock.length > 0) {
+    // Add last block
+    blocks.push(currentBlock);
+  }
+  return blocks;
+}
+```
+
+この実装では、まずシートの全範囲の値を getValues メソッドで取得し、行列を転置した後、列で分割しています。getValues メソッドは、範囲の左上から右下までのすべてのセルの値を2次元配列で返します。転置を行うために、2次元配列の各行を列として、各列を行として再構成します。
