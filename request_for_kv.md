@@ -4911,3 +4911,157 @@ private splitIntoBlocks(): string[][][] {
 ```
 
 この修正版では、外側のループを列方向、内側のループを行方向に設定し、列ごとにループを回して各列を column に格納しています。また、currentBlock には column を追加していきます。こうすることで、blocks 内の各ブロックが行列として正しく保持されます。
+
+=====
+
+分割はできています。`push` するときに転置する必要がありますか？
+
+=====
+
+先程の修正で、転置する必要はありません。配列の要素として、各列を配列に格納するようになっているため、splitIntoBlocks() の戻り値である blocks の各要素も列を表す配列となっています。
+
+そのため、isSheetNamesBlock() や isSheetColumnNamesBlock() などで、カラム名を確認するために、block[0] で配列の先頭行を取得することができます。また、それぞれの列の値にアクセスする場合は、block[列のインデックス][行のインデックス] でアクセスできます。
+
+=====
+
+blocks の各ブロックは
+
+```
+[[sheet_id, kv1, , , , ], [sheet_name, destination, , , , ], [memo, memo, , , , ]]
+```
+
+```
+[[sheet_id, kv1, kv1, kv1, kv1, kv1], [col_id, k1, k2, k3, v1, v2], [col_name, col_name1, col_name2, col_name3, col_name4, col_name5], [memo, memo1, , , , memo5]]
+```
+
+となっていました。中身のデータの行と列が逆になってしまっています。
+
+分割の仕方は正しいと思いますので、データの行と列だけ戻したいです。
+
+それとも、私の認識が誤っていますか？
+
+=====
+
+申し訳ありません。確かにデータの行と列が逆になっていますね。
+
+push する際に転置する必要があるかどうかは、取り扱うデータの形式に依存しますが、一般的にはデータを扱う上で行列の概念が一般的であるため、列ごとに処理することが多いです。
+
+修正案としては、列ごとにループを回すように変更することで、以下のようなコードになります。
+
+```typescript
+private splitIntoBlocks(): string[][][] {
+  const blocks = [];
+  const numRows = this.sheet.getLastRow();
+  const numCols = this.sheet.getLastColumn();
+  let currentBlock = [];
+  for (let j = 1; j <= numCols; j++) {
+    const column = [];
+    for (let i = 1; i <= numRows; i++) {
+      const cellValue = this.sheet.getRange(i, j).getValue().toString();
+      column.push(cellValue);
+    }
+    if (column.some((cellValue) => cellValue)) {
+      // Column has at least one non-empty cell
+      currentBlock.push(column);
+    } else if (currentBlock.length > 0) {
+      // End of block
+      blocks.push(currentBlock);
+      currentBlock = [];
+    }
+  }
+  if (currentBlock.length > 0) {
+    // Add last block
+    blocks.push(currentBlock);
+  }
+  return blocks;
+}
+```
+
+また、このコードでは column.some((cellValue) => cellValue) で、列に空白以外の値が含まれているかどうかを確認していますが、もし列に数式が含まれている場合、数式自体は空白として判定され、その列がブロックに含まれてしまいます。これを避けるためには、getValue() の代わりに getDisplayValue() を使うことで、数式自体ではなく、数式の評価値を取得することができます。
+
+=====
+
+私の環境ではうまくいかないのです…
+
+`blocks.push(currentBlock);` の代わりに、転置を行って転置したデータを push したいです。どうすれば良いでしょうか。
+
+=====
+
+転置する場合は、各行を列として扱い、各列を行として扱えばよいです。つまり、転置する前の各行の配列を currentRow とし、転置した後の各列の配列を currentColumn とすると、currentColumn.push(currentRow[j]); のように各列に要素を追加することができます。以下は修正案の例です。
+
+```typescript
+private splitIntoBlocks(): string[][][] {
+  const blocks = [];
+  const numRows = this.sheet.getLastRow();
+  const numCols = this.sheet.getLastColumn();
+  let currentBlock = [];
+  for (let j = 1; j <= numCols; j++) {
+    let currentColumn = [];
+    for (let i = 1; i <= numRows; i++) {
+      const cellValue = this.sheet.getRange(i, j).getValue().toString();
+      currentColumn.push(cellValue);
+    }
+    if (currentColumn.some((cellValue) => cellValue)) {
+      // Column has at least one non-empty cell
+      currentBlock.push(currentColumn);
+    } else if (currentBlock.length > 0) {
+      // End of block
+      blocks.push(currentBlock);
+      currentBlock = [];
+    }
+  }
+  if (currentBlock.length > 0) {
+    // Add last block
+    blocks.push(currentBlock);
+  }
+  return blocks;
+}
+```
+
+この修正で、各ブロックの中身が以下のようになるはずです。
+
+```css
+[[sheet_id, sheet_name, memo], [kv1, destination, memo], [, , ], [, , ], [, , ], [, , ]]
+```
+
+```css
+[[sheet_id, col_id, col_name, memo], [kv1, k1, col_name1, memo1], [kv1, k2, col_name2, ], [kv1, k3, col_name3, ], [kv1, v1, col_name4, ], [kv1, v2, col_name5, memo5]]
+```
+確認してみてください。
+
+=====
+
+良く確認しました。
+
+```typescript
+	[[sheet_id, kv1, , , , ], [sheet_name, destination, , , , ], [memo, memo, , , , ]]
+```
+
+```typescript
+	[[sheet_id, kv1, kv1, kv1, kv1, kv1], [col_id, k1, k2, k3, v1, v2], [col_name, col_name1, col_name2, col_name3, col_name4, col_name5], [memo, memo1, , , , memo5]]
+```
+
+となっていました。ですので、最後に転置する必要があると思います。
+
+2次元配列 `currentBlock` を転置し、`transposedBlock` としたいです。それを blocks に格納したいです。
+
+2次元配列 `currentBlock` を転置し、`transposedBlock` とする方法を教えてください。
+
+=====
+
+2次元配列を転置する方法は、以下のように行えます。
+
+```typescript
+function transpose(array: any[][]): any[][] {
+  return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
+}
+```
+
+この関数を使用して、currentBlock を転置した transposedBlock を作成し、それを blocks に追加するには、以下のように書けます。
+
+```typescript
+const transposedBlock = transpose(currentBlock);
+blocks.push(transposedBlock);
+```
+
+これで、blocks には転置されたデータが含まれるようになります。
