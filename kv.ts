@@ -134,9 +134,31 @@ function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns:
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (columns.every((colIndex, index) => row[colIndex - 1] === values[index])) {
+    if (columns.every((colIndex, index) => valueEquals(row[colIndex - 1], values[index]))) {
       return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
     }
   }
   return sheet.getRange(sheet.getLastRow() + 1, 1, 1, sheet.getLastColumn());
+}
+
+/**
+ * Compares two values and returns true if they are equal. 
+ * If the values are Dates, they are compared as UTC timestamps.
+ *
+ * @param {any} lhs - The first value to compare. This value is assumed to be the value from the sheet.
+ * @param {any} rhs - The second value to compare. This value is assumed to be the value from the API.
+ * @returns True if the values are equal, false otherwise.
+ */
+function valueEquals(lhs: any, rhs: any): boolean {
+  if (lhs instanceof Date) {
+    const rhsDate = new Date(rhs);
+    const rhsUTC = new Date(
+      rhsDate.toLocaleString('en-US', {
+        timeZone: 'UTC',
+      }),
+    );
+
+    return lhs.getTime() == rhsUTC.getTime();
+  }
+  return lhs == rhs;
 }
