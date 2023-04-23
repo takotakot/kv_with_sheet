@@ -31,6 +31,25 @@ The request is handled by `doPost`.
 curl -v -X POST --data @./data.json -H "Content-Type: application/json" https://script.google.com/macros/s/AK.../exec
 ```
 
+### Sheet structure
+
+kv_config sheet:
+
+||sheet_id|sheet_name|memo||sheet_id|col_id|col_name|memo|
+|--|--|--|--|--|--|--|--|--|
+||kv1|destination|memo||kv1|k1|col_name1|memo1|
+||||||kv1|k2|col_name2||
+||||||kv1|k3|col_name3||
+||||||kv1|v1|col_name4||
+||||||kv1|v2|col_name5|memo5|
+||||||||||
+
+destination sheet:
+
+|col_name1|col_name2|col_name3|col_name4|col_name5|
+|--|--|--|--|--|
+|key1|key2|key3|a|b|
+
 ## License
 
 These codes are licensed under CC0 or MIT.
