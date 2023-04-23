@@ -1,0 +1,27 @@
+{
+  "destination": "kv1",
+  "data": [
+    {
+      "keys": {
+        "k1": "key1",
+        "k2": "key2",
+        "k3": "key3"
+      },
+      "values": {
+        "v1": "value1",
+        "v2": "value2"
+      }
+    },
+    {
+      "keys": {
+        "k1": "key4",
+        "k2": "key5",
+        "k3": "key6"
+      },
+      "values": {
+        "v1": "value3",
+        "v2": "value4"
+      }
+    }
+  ]
+}
