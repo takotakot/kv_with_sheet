@@ -1,3 +1,5 @@
+import { KvConfig } from "./KvConfig";
+
 /**
  * Update ShreadSheet from Dictionary.
  *

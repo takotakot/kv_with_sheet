@@ -1,4 +1,4 @@
-class KvConfig {
+export class KvConfig {
   // This class represents the key-value configuration
   // stored in a Google Sheets spreadsheet.
 
