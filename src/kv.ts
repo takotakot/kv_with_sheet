@@ -45,7 +45,7 @@ function kvConfigFactory(): KvConfig {
  * @param {Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>} data - The data to update the sheet with.
  * @throws {Error} Throws an error if any column name is not found in the sheet header row.
  */
-function updateDestinationSheet(sheet, columnNames, data) {
+export function updateDestinationSheet(sheet, columnNames, data) {
   // Get the header row.
   const headerRow = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
@@ -123,7 +123,7 @@ function updateDestinationSheet(sheet, columnNames, data) {
  * @returns Sheet object with the given name
  * @throws Error if the sheet with the given name does not exist
  */
-function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+export function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
   // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
