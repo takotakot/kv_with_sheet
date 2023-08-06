@@ -1,1 +1,1 @@
-type ColumnNames = {[key: string]: string};
+type ColumnNames = { [key: string]: string };
