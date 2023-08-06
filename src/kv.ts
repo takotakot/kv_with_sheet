@@ -1,25 +1,30 @@
+import { KvConfig } from './KvConfig';
+
 /**
  * Update ShreadSheet from Dictionary.
  *
  * @param {destination: string, data: [keys: any, values: any]} dict - The dictionary to update the sheet with.
  */
-function updateUsingDictionary(dict: { destination: string, data: [keys: any, values: any]}) {
+export function updateUsingDictionary(dict: {
+  destination: string;
+  data: [keys: any, values: any];
+}) {
   const kvConfig = kvConfigFactory();
   const sheetNames: SheetNames = kvConfig.getSheetNames();
   const sheetColumnNames: SheetColumnNames = kvConfig.getSheetColumnNames();
 
   const destinationId = dict.destination;
-  const destinationSheetName = sheetNames
-  .filter(sheetPointer => sheetPointer.sheetId === destinationId)
-  [0].sheetName;
+  const destinationSheetName = sheetNames.filter(
+    sheetPointer => sheetPointer.sheetId === destinationId
+  )[0].sheetName;
   const sheet = switchSheet(destinationSheetName);
-  
+
   const columnNames: ColumnNames = sheetColumnNames
     .filter(col => col.sheetId === destinationId)
-    .reduce((obj, {colId, colName}) => {
-          obj[colId] = colName;
-          return obj;
-        }, {});
+    .reduce((obj, { colId, colName }) => {
+      obj[colId] = colName;
+      return obj;
+    }, {});
 
   updateDestinationSheet(sheet, columnNames, dict.data);
 }
@@ -40,9 +45,11 @@ function kvConfigFactory(): KvConfig {
  * @param {Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>} data - The data to update the sheet with.
  * @throws {Error} Throws an error if any column name is not found in the sheet header row.
  */
-function updateDestinationSheet(sheet, columnNames, data) {
+export function updateDestinationSheet(sheet, columnNames, data) {
   // Get the header row.
-  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const headerRow = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getValues()[0];
 
   // Check if all column names exist in header row.
   Object.values(columnNames).forEach(columnName => {
@@ -60,9 +67,16 @@ function updateDestinationSheet(sheet, columnNames, data) {
   // Update the sheet with the data.
   data.forEach(datum => {
     // Get the row range.
-    const rowRange = getRowRangeByValues(sheet, keyColumns, Object.values(datum.keys));
+    const rowRange = getRowRangeByValues(
+      sheet,
+      keyColumns,
+      Object.values(datum.keys)
+    );
     // Get the values row.
-    const valuesRow = rowRange.getRow() === 0 ? Array(headerRow.length).fill("") : rowRange.getValues()[0];
+    const valuesRow =
+      rowRange.getRow() === 0
+        ? Array(headerRow.length).fill('')
+        : rowRange.getValues()[0];
 
     // Update the keys in the values row.
     Object.entries(datum.keys).forEach(([keyHeader, key]) => {
@@ -83,13 +97,16 @@ function updateDestinationSheet(sheet, columnNames, data) {
     // Append a new row if the data row was not found, otherwise update the existing row.
     if (rowRange.getRow() === 0) {
       // If the data row was not found, append a new row with the keys and values.
-      const keys = Object.entries(datum.keys).reduce((arr, [keyHeader, key]) => {
-        const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
-        if (keyColumn !== -1) {
-          arr[keyColumn] = key;
-        }
-        return arr;
-      }, Array(headerRow.length).fill(""));
+      const keys = Object.entries(datum.keys).reduce(
+        (arr, [keyHeader, key]) => {
+          const keyColumn = headerRow.indexOf(columnNames[keyHeader]);
+          if (keyColumn !== -1) {
+            arr[keyColumn] = key;
+          }
+          return arr;
+        },
+        Array(headerRow.length).fill('')
+      );
       sheet.appendRow([...keys, ...Object.values(datum.values)]);
     } else {
       // If the data row was found, update the values in the row.
@@ -101,12 +118,14 @@ function updateDestinationSheet(sheet, columnNames, data) {
 
 /**
  * Gets a Sheet object by its name
- * 
+ *
  * @param sheetName Name of the sheet to get
  * @returns Sheet object with the given name
  * @throws Error if the sheet with the given name does not exist
  */
-function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+export function switchSheet(
+  sheetName: string
+): GoogleAppsScript.Spreadsheet.Sheet {
   // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -130,7 +149,11 @@ function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
  * @param values - The values to match in corresponding columns
  * @returns The range of the matched row or a new row at the bottom of the sheet
  */
-function getRowRangeByValues(sheet: GoogleAppsScript.Spreadsheet.Sheet, columns: number[], values: any[]): GoogleAppsScript.Spreadsheet.Range {
+function getRowRangeByValues(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columns: number[],
+  values: any[]
+): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
     const row = data[i];

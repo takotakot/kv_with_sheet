@@ -1,4 +1,4 @@
-class KvConfig {
+export class KvConfig {
   // This class represents the key-value configuration
   // stored in a Google Sheets spreadsheet.
 
@@ -49,9 +49,9 @@ class KvConfig {
    * If a row contains only empty cells, it is skipped.
    * The sheet names and IDs are added to the sheetNames array.
    * Finally, the sheetNames property of the object is set to the sheetNames array.
-   * 
+   *
    * @param {string[][]} rows - The rows to process.
-   * 
+   *
    * @returns {void}
    */
   private processSheetNamesBlock(rows: string[][]): void {
@@ -61,12 +61,12 @@ class KvConfig {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       // Skip empty rows
-      if (row.every((cellValue) => !cellValue)) {
+      if (row.every(cellValue => !cellValue)) {
         continue;
       }
       // Extract the sheet name and ID from the row.
-      const sheetName = row[headerRow.indexOf("sheet_name")];
-      const sheetId = row[headerRow.indexOf("sheet_id")];
+      const sheetName = row[headerRow.indexOf('sheet_name')];
+      const sheetId = row[headerRow.indexOf('sheet_id')];
       sheetNames.push({ sheetId, sheetName });
     }
     this.sheetNames = sheetNames;
@@ -85,13 +85,13 @@ class KvConfig {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       // Skip empty rows
-      if (row.every((cellValue) => !cellValue)) {
+      if (row.every(cellValue => !cellValue)) {
         continue;
       }
       // Extract the sheet ID, column ID and column name from the row.
-      const sheetId = row[headerRow.indexOf("sheet_id")];
-      const colId = row[headerRow.indexOf("col_id")];
-      const colName = row[headerRow.indexOf("col_name")];
+      const sheetId = row[headerRow.indexOf('sheet_id')];
+      const colId = row[headerRow.indexOf('col_id')];
+      const colName = row[headerRow.indexOf('col_name')];
       sheetColumns.push({ sheetId, colId, colName });
     }
 
@@ -110,18 +110,18 @@ class KvConfig {
     const numRows = this.sheet.getLastRow();
     const numCols = this.sheet.getLastColumn();
     let currentBlock = [];
-  
+
     for (let j = 1; j <= numCols; j++) {
-      let currentColumn = [];
-  
+      const currentColumn = [];
+
       // Get all cell values in the current column
       for (let i = 1; i <= numRows; i++) {
         const cellValue = this.sheet.getRange(i, j).getValue().toString();
         currentColumn.push(cellValue);
       }
-  
+
       // Check if current column has at least one non-empty cell
-      if (currentColumn.some((cellValue) => cellValue)) {
+      if (currentColumn.some(cellValue => cellValue)) {
         // Column has at least one non-empty cell, add it to the current block
         currentBlock.push(currentColumn);
       } else if (currentBlock.length > 0) {
@@ -131,12 +131,12 @@ class KvConfig {
         currentBlock = [];
       }
     }
-  
+
     // Add the last block if there are any columns in it
     if (currentBlock.length > 0) {
       blocks.push(this.transpose(currentBlock));
     }
-  
+
     return blocks;
   }
 
@@ -146,7 +146,7 @@ class KvConfig {
    * @returns The transposed array
    */
   private transpose(array: any[][]): any[][] {
-    return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
+    return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
   }
 
   /**
@@ -155,12 +155,12 @@ class KvConfig {
    * @returns True if the block contains sheet names, false otherwise
    */
   private isSheetNamesBlock(block: string[][]): boolean {
-    const expectedColumns = ["sheet_id", "sheet_name"];
+    const expectedColumns = ['sheet_id', 'sheet_name'];
     const headerRow = block[0];
     // Logger.log(headerRow);
 
     // Check if all expected columns are present in the header row
-    const includesAllColumns = expectedColumns.every((col) =>
+    const includesAllColumns = expectedColumns.every(col =>
       headerRow.includes(col)
     );
 
@@ -174,11 +174,11 @@ class KvConfig {
    * @returns True if the block contains column names, false otherwise
    */
   private isSheetColumnNamesBlock(block: string[][]): boolean {
-    const expectedColumns = ["sheet_id", "col_id", "col_name"];
+    const expectedColumns = ['sheet_id', 'col_id', 'col_name'];
     const headerRow = block[0];
 
     // Check if all expected columns are present in the header row
-    const includesAllColumns = expectedColumns.every((col) =>
+    const includesAllColumns = expectedColumns.every(col =>
       headerRow.includes(col)
     );
 

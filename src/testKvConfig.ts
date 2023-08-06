@@ -1,3 +1,5 @@
+import { KvConfig } from './KvConfig';
+
 function testKvConfig(): void {
   const kvConfig = new KvConfig('kv_config');
   const sheetNames = kvConfig.getSheetNames();
