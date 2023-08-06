@@ -1,3 +1,5 @@
+import { updateUsingDictionary } from './kv';
+
 function doPost(e) {
   const data = JSON.parse(e.postData.getDataAsString());
   // Logger.log(data);

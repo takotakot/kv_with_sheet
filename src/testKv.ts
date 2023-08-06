@@ -1,4 +1,5 @@
 import { KvConfig } from "./KvConfig";
+import { updateUsingDictionary } from "./kv";
 
 function testKv(): void {
   const kvConfig = new KvConfig('kv_config');

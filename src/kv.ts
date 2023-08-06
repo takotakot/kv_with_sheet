@@ -5,7 +5,7 @@ import { KvConfig } from "./KvConfig";
  *
  * @param {destination: string, data: [keys: any, values: any]} dict - The dictionary to update the sheet with.
  */
-function updateUsingDictionary(dict: {
+export function updateUsingDictionary(dict: {
   destination: string;
   data: [keys: any, values: any];
 }) {
