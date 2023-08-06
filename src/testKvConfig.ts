@@ -1,4 +1,4 @@
-import { KvConfig } from "./KvConfig";
+import { KvConfig } from './KvConfig';
 
 function testKvConfig(): void {
   const kvConfig = new KvConfig('kv_config');

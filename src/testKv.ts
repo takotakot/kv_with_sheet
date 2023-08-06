@@ -1,5 +1,9 @@
-import { KvConfig } from "./KvConfig";
-import { switchSheet, updateDestinationSheet, updateUsingDictionary } from "./kv";
+import { KvConfig } from './KvConfig';
+import {
+  switchSheet,
+  updateDestinationSheet,
+  updateUsingDictionary,
+} from './kv';
 
 function testKv(): void {
   const kvConfig = new KvConfig('kv_config');

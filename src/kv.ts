@@ -1,4 +1,4 @@
-import { KvConfig } from "./KvConfig";
+import { KvConfig } from './KvConfig';
 
 /**
  * Update ShreadSheet from Dictionary.
@@ -123,7 +123,9 @@ export function updateDestinationSheet(sheet, columnNames, data) {
  * @returns Sheet object with the given name
  * @throws Error if the sheet with the given name does not exist
  */
-export function switchSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+export function switchSheet(
+  sheetName: string
+): GoogleAppsScript.Spreadsheet.Sheet {
   // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
