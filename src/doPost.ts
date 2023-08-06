@@ -1,7 +1,7 @@
 import { updateUsingDictionary } from './kv';
 
-function doPost(e) {
-  const data = JSON.parse(e.postData.getDataAsString());
+function doPost(e: GoogleAppsScript.Events.DoPost) {
+  const data = JSON.parse(e.postData.contents);
   // Logger.log(data);
 
   updateUsingDictionary(data);
