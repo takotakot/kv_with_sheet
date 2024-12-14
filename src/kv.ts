@@ -169,7 +169,7 @@ function getRowRangeByValues(
 }
 
 /**
- * Compares two values and returns true if they are equal. 
+ * Compares two values and returns true if they are equal.
  * If the values are Dates, they are compared as UTC timestamps.
  *
  * @param {any} lhs - The first value to compare. This value is assumed to be the value from the sheet.
