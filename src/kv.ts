@@ -157,7 +157,11 @@ function getRowRangeByValues(
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (columns.every((colIndex, index) => valueEquals(row[colIndex - 1], values[index]))) {
+    if (
+      columns.every((colIndex, index) =>
+        valueEquals(row[colIndex - 1], values[index])
+      )
+    ) {
       return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
     }
   }
