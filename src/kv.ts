@@ -185,7 +185,8 @@ function valueEquals(lhs: any, rhs: any): boolean {
       })
     );
 
-    return lhs.getTime() == rhsUTC.getTime();
+    return lhs.getTime() === rhsUTC.getTime();
   }
+  // eslint-disable-next-line eqeqeq
   return lhs == rhs;
 }
