@@ -182,7 +182,7 @@ function valueEquals(lhs: any, rhs: any): boolean {
     const rhsUTC = new Date(
       rhsDate.toLocaleString('en-US', {
         timeZone: 'UTC',
-      }),
+      })
     );
 
     return lhs.getTime() == rhsUTC.getTime();
