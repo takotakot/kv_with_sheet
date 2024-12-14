@@ -157,7 +157,11 @@ function getRowRangeByValues(
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
-    if (columns.every((colIndex, index) => valueEquals(row[colIndex - 1], values[index]))) {
+    if (
+      columns.every((colIndex, index) =>
+        valueEquals(row[colIndex - 1], values[index])
+      )
+    ) {
       return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
     }
   }
@@ -165,7 +169,7 @@ function getRowRangeByValues(
 }
 
 /**
- * Compares two values and returns true if they are equal. 
+ * Compares two values and returns true if they are equal.
  * If the values are Dates, they are compared as UTC timestamps.
  *
  * @param {any} lhs - The first value to compare. This value is assumed to be the value from the sheet.
@@ -178,10 +182,11 @@ function valueEquals(lhs: any, rhs: any): boolean {
     const rhsUTC = new Date(
       rhsDate.toLocaleString('en-US', {
         timeZone: 'UTC',
-      }),
+      })
     );
 
-    return lhs.getTime() == rhsUTC.getTime();
+    return lhs.getTime() === rhsUTC.getTime();
   }
+  // eslint-disable-next-line eqeqeq
   return lhs == rhs;
 }
