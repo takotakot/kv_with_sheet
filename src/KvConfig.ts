@@ -147,7 +147,7 @@ export class KvConfig {
    * @param array - The array to transpose
    * @returns The transposed array
    */
-  private transpose(array: any[][]): any[][] {
+  private transpose(array: unknown[][]): unknown[][] {
     return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
   }
 
