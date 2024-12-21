@@ -1,6 +1,15 @@
 import { updateUsingDictionary } from './kv';
 
-function doPost(e: GoogleAppsScript.Events.DoPost) {
+/**
+ * Handler for doPost request.
+ *
+ * @param e - The event object.
+ * @returns The response object.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function doPost(
+  e: GoogleAppsScript.Events.DoPost
+): GoogleAppsScript.Content.TextOutput {
   const data = JSON.parse(e.postData.contents);
   // Logger.log(data);
 
