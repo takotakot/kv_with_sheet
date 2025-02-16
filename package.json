@@ -4,7 +4,7 @@
     "@types/google-apps-script": "^1.0.91",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
-    "eslint": "^8.46.0",
+    "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",
     "gts": "^5.0.0",
