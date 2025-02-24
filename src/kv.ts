@@ -3,12 +3,9 @@ import { KvConfig } from './KvConfig';
 /**
  * Update ShreadSheet from Dictionary.
  *
- * @param {destination: string, data: [keys: any, values: any]} dict - The dictionary to update the sheet with.
+ * @param dict - The dictionary to update the sheet with.
  */
-export function updateUsingDictionary(dict: {
-  destination: string;
-  data: [keys: any, values: any];
-}) {
+export function updateUsingDictionary(dict: Dict) {
   const kvConfig = kvConfigFactory();
   const sheetNames: SheetNames = kvConfig.getSheetNames();
   const sheetColumnNames: SheetColumnNames = kvConfig.getSheetColumnNames();
@@ -32,7 +29,7 @@ export function updateUsingDictionary(dict: {
 /**
  * KvConfig factory method.
  *
- * @returns {KvConfig} The KvConfig object.
+ * @returns The KvConfig object.
  */
 function kvConfigFactory(): KvConfig {
   return new KvConfig('kv_config');
@@ -40,12 +37,17 @@ function kvConfigFactory(): KvConfig {
 
 /**
  * Update the specified sheet with the given data.
- * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The sheet to update.
- * @param {ColumnNames} columnNames - The column names mapping object.
- * @param {Array<{keys: {[key: string]: any}, values: {[key: string]: any}}>} data - The data to update the sheet with.
+ *
+ * @param sheet - The sheet to update.
+ * @param columnNames - The column names mapping object.
+ * @param data - The data to update the sheet with.
  * @throws {Error} Throws an error if any column name is not found in the sheet header row.
  */
-export function updateDestinationSheet(sheet, columnNames, data) {
+export function updateDestinationSheet(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columnNames: ColumnNames,
+  data: Kvs
+): void {
   // Get the header row.
   const headerRow = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
@@ -61,7 +63,9 @@ export function updateDestinationSheet(sheet, columnNames, data) {
   // Get the key columns.
   const firstDatum = data[0];
   const keyColumns = Object.entries(columnNames)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([colId, colName]) => Object.keys(firstDatum.keys).includes(colId))
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .map(([colId, colName]) => headerRow.indexOf(colName) + 1);
 
   // Update the sheet with the data.
@@ -152,6 +156,7 @@ export function switchSheet(
 function getRowRangeByValues(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columns: number[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   values: any[]
 ): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
@@ -172,10 +177,11 @@ function getRowRangeByValues(
  * Compares two values and returns true if they are equal.
  * If the values are Dates, they are compared as UTC timestamps.
  *
- * @param {any} lhs - The first value to compare. This value is assumed to be the value from the sheet.
- * @param {any} rhs - The second value to compare. This value is assumed to be the value from the API.
+ * @param lhs - The first value to compare. This value is assumed to be the value from the sheet.
+ * @param rhs - The second value to compare. This value is assumed to be the value from the API.
  * @returns True if the values are equal, false otherwise.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function valueEquals(lhs: any, rhs: any): boolean {
   if (lhs instanceof Date) {
     const rhsDate = new Date(rhs);

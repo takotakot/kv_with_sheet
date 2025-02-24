@@ -2,20 +2,20 @@ export class KvConfig {
   // This class represents the key-value configuration
   // stored in a Google Sheets spreadsheet.
 
-  // The sheet object representing the active spreadsheet.
+  /** The sheet object representing the active spreadsheet. */
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
-  // An array of objects representing the sheet names and their IDs.
+  /** An array of objects representing the sheet names and their IDs. */
   private sheetNames: SheetNames = [];
 
-  // An array of objects representing the sheet column names, IDs and names.
+  /** An array of objects representing the sheet column names, IDs and names. */
   private sheetColumnNames: SheetColumnNames = [];
 
   /**
    * Constructs a new KvConfig object with the specified sheet name.
    *
-   * @param {string} sheetName - The name of the sheet to use as a configuration store.
-   * @returns {void}
+   * @param sheetName - The name of the sheet to use as a configuration store.
+   * @returns A new KvConfig object.
    */
   constructor(sheetName: string) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -27,7 +27,7 @@ export class KvConfig {
    * Reads the configuration from the sheet by splitting it into blocks and processing each block.
    * If a block matches the expected format for sheet names, it is processed by the `processSheetNamesBlock` method.
    * If a block matches the expected format for sheet column names, it is processed by the `processSheetColumnNamesBlock` method.
-   * @returns void
+   * @returns
    */
   private readFromSheet(): void {
     // Splits the sheet into blocks, and processes each block.
@@ -50,9 +50,8 @@ export class KvConfig {
    * The sheet names and IDs are added to the sheetNames array.
    * Finally, the sheetNames property of the object is set to the sheetNames array.
    *
-   * @param {string[][]} rows - The rows to process.
-   *
-   * @returns {void}
+   * @param rows - The rows to process.
+   * @returns
    */
   private processSheetNamesBlock(rows: string[][]): void {
     // The header row contains the names of the columns.
@@ -74,8 +73,9 @@ export class KvConfig {
 
   /**
    * Processes a block of rows representing sheet column names, IDs and names.
-   * @param {string[][]} rows - A two-dimensional array of strings representing the rows of the block.
-   * @returns {void}
+   *
+   * @param rows - A two-dimensional array of strings representing the rows of the block.
+   * @returns
    */
   private processSheetColumnNamesBlock(rows: string[][]): void {
     // The header row contains the names of the columns.
@@ -103,6 +103,7 @@ export class KvConfig {
    * containing at least one non-empty cell. Each block is represented as a 2D array
    * of strings, where the outer array represents columns and the inner array represents
    * rows within a column.
+   *
    * @returns The blocks of non-empty columns and rows in the sheet
    */
   private splitIntoBlocks(): string[][][] {
@@ -142,15 +143,17 @@ export class KvConfig {
 
   /**
    * Transpose a 2D array (i.e., rows become columns and columns become rows).
+   *
    * @param array - The array to transpose
    * @returns The transposed array
    */
-  private transpose(array: any[][]): any[][] {
+  private transpose(array: unknown[][]): unknown[][] {
     return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
   }
 
   /**
    * Check if a block of data contains sheet names.
+   *
    * @param block - The block of data to check
    * @returns True if the block contains sheet names, false otherwise
    */
@@ -170,6 +173,7 @@ export class KvConfig {
 
   /**
    * Check if a block of data contains column names for a sheet.
+   *
    * @param block - The block of data to check
    * @returns True if the block contains column names, false otherwise
    */
@@ -188,6 +192,7 @@ export class KvConfig {
 
   /**
    * Returns an object that maps sheet IDs to sheet names.
+   *
    * @returns Object that maps sheet IDs to sheet names.
    */
   getSheetNames(): SheetNames {
@@ -196,6 +201,7 @@ export class KvConfig {
 
   /**
    * Returns an object that maps sheet IDs to column IDs to column names.
+   *
    * @returns Object that maps sheet IDs to column IDs to column names.
    */
   getSheetColumnNames(): SheetColumnNames {
