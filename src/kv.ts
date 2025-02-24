@@ -5,10 +5,7 @@ import { KvConfig } from './KvConfig';
  *
  * @param dict - The dictionary to update the sheet with.
  */
-export function updateUsingDictionary(dict: {
-  destination: string;
-  data: [keys: any, values: any];
-}): void {
+export function updateUsingDictionary(dict: Dict) {
   const kvConfig = kvConfigFactory();
   const sheetNames: SheetNames = kvConfig.getSheetNames();
   const sheetColumnNames: SheetColumnNames = kvConfig.getSheetColumnNames();
@@ -49,8 +46,8 @@ function kvConfigFactory(): KvConfig {
 export function updateDestinationSheet(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columnNames: ColumnNames,
-  data: { keys: { [key: string]: any }; values: { [key: string]: any } }[]
-) {
+  data: Kvs
+): void {
   // Get the header row.
   const headerRow = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
@@ -159,6 +156,7 @@ export function switchSheet(
 function getRowRangeByValues(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columns: number[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   values: any[]
 ): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
@@ -183,6 +181,7 @@ function getRowRangeByValues(
  * @param rhs - The second value to compare. This value is assumed to be the value from the API.
  * @returns True if the values are equal, false otherwise.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function valueEquals(lhs: any, rhs: any): boolean {
   if (lhs instanceof Date) {
     const rhsDate = new Date(rhs);

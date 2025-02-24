@@ -57,8 +57,8 @@ function testKv(): void {
 /**
  * Update the sheet identified with "kv1" with the data.
  */
-function testUpdateUsingDictionary() {
-  const request: { destination: string; data: [keys: any, values: any] } = {
+function testUpdateUsingDictionary(): void {
+  const request = {
     destination: 'kv1',
     data: [
       {
