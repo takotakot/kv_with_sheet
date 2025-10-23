@@ -31,6 +31,6 @@
     "deploy:prod": "npm run lint && npm run test && npm run build && ncp .clasp-prod.json .clasp.json && clasp push"
   },
   "devDependencies": {
-    "@rollup/plugin-multi-entry": "^6.0.1"
+    "@rollup/plugin-multi-entry": "^7.1.0"
   }
 }
