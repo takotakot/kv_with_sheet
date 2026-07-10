@@ -66,7 +66,7 @@ export class KvConfig {
       // Extract the sheet name and ID from the row.
       const sheetName = row[headerRow.indexOf('sheet_name')];
       const sheetId = row[headerRow.indexOf('sheet_id')];
-      sheetNames.push({ sheetId, sheetName });
+      sheetNames.push({sheetId, sheetName});
     }
     this.sheetNames = sheetNames;
   }
@@ -92,7 +92,7 @@ export class KvConfig {
       const sheetId = row[headerRow.indexOf('sheet_id')];
       const colId = row[headerRow.indexOf('col_id')];
       const colName = row[headerRow.indexOf('col_name')];
-      sheetColumns.push({ sheetId, colId, colName });
+      sheetColumns.push({sheetId, colId, colName});
     }
 
     this.sheetColumnNames = sheetColumns;
@@ -164,7 +164,7 @@ export class KvConfig {
 
     // Check if all expected columns are present in the header row
     const includesAllColumns = expectedColumns.every(col =>
-      headerRow.includes(col)
+      headerRow.includes(col),
     );
 
     // Return true if all expected columns are present in the header row
@@ -183,7 +183,7 @@ export class KvConfig {
 
     // Check if all expected columns are present in the header row
     const includesAllColumns = expectedColumns.every(col =>
-      headerRow.includes(col)
+      headerRow.includes(col),
     );
 
     // Return true if all expected columns are present in the header row

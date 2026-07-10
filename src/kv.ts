@@ -1,4 +1,4 @@
-import { KvConfig } from './KvConfig';
+import {KvConfig} from './KvConfig';
 
 /**
  * Update ShreadSheet from Dictionary.
@@ -12,13 +12,13 @@ export function updateUsingDictionary(dict: Dict) {
 
   const destinationId = dict.destination;
   const destinationSheetName = sheetNames.filter(
-    sheetPointer => sheetPointer.sheetId === destinationId
+    sheetPointer => sheetPointer.sheetId === destinationId,
   )[0].sheetName;
   const sheet = switchSheet(destinationSheetName);
 
   const columnNames: ColumnNames = sheetColumnNames
     .filter(col => col.sheetId === destinationId)
-    .reduce((obj, { colId, colName }) => {
+    .reduce((obj, {colId, colName}) => {
       obj[colId] = colName;
       return obj;
     }, {});
@@ -46,7 +46,7 @@ function kvConfigFactory(): KvConfig {
 export function updateDestinationSheet(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columnNames: ColumnNames,
-  data: Kvs
+  data: Kvs,
 ): void {
   // Get the header row.
   const headerRow = sheet
@@ -74,7 +74,7 @@ export function updateDestinationSheet(
     const rowRange = getRowRangeByValues(
       sheet,
       keyColumns,
-      Object.values(datum.keys)
+      Object.values(datum.keys),
     );
     // Get the values row.
     const valuesRow =
@@ -109,7 +109,7 @@ export function updateDestinationSheet(
           }
           return arr;
         },
-        Array(headerRow.length).fill('')
+        Array(headerRow.length).fill(''),
       );
       sheet.appendRow([...keys, ...Object.values(datum.values)]);
     } else {
@@ -128,7 +128,7 @@ export function updateDestinationSheet(
  * @throws Error if the sheet with the given name does not exist
  */
 export function switchSheet(
-  sheetName: string
+  sheetName: string,
 ): GoogleAppsScript.Spreadsheet.Sheet {
   // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -157,14 +157,14 @@ function getRowRangeByValues(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columns: number[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  values: any[]
+  values: any[],
 ): GoogleAppsScript.Spreadsheet.Range {
   const data = sheet.getDataRange().getValues();
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
     if (
       columns.every((colIndex, index) =>
-        valueEquals(row[colIndex - 1], values[index])
+        valueEquals(row[colIndex - 1], values[index]),
       )
     ) {
       return sheet.getRange(i + 1, 1, 1, sheet.getLastColumn());
@@ -188,7 +188,7 @@ function valueEquals(lhs: any, rhs: any): boolean {
     const rhsUTC = new Date(
       rhsDate.toLocaleString('en-US', {
         timeZone: 'UTC',
-      })
+      }),
     );
 
     return lhs.getTime() === rhsUTC.getTime();
