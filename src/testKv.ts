@@ -1,10 +1,7 @@
-import { KvConfig } from './KvConfig';
-import {
-  switchSheet,
-  updateDestinationSheet,
-  updateUsingDictionary,
-} from './kv';
+import {KvConfig} from './KvConfig';
+import {switchSheet, updateDestinationSheet, updateUsingDictionary} from './kv';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testKv(): void {
   const kvConfig = new KvConfig('kv_config');
   const sheetNames: SheetNames = kvConfig.getSheetNames();
@@ -41,7 +38,7 @@ function testKv(): void {
 
   const columnNames: ColumnNames = sheetColumnNames
     .filter(col => col.sheetId === 'kv1')
-    .reduce((obj, { colId, colName }) => {
+    .reduce((obj, {colId, colName}) => {
       obj[colId] = colName;
       return obj;
     }, {});
@@ -57,6 +54,7 @@ function testKv(): void {
 /**
  * Update the sheet identified with "kv1" with the data.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testUpdateUsingDictionary(): void {
   const request = {
     destination: 'kv1',

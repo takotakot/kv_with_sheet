@@ -1,4 +1,4 @@
-import { KvConfig } from '../src/KvConfig';
+import {KvConfig} from '../src/KvConfig';
 
 describe('KvConfig', () => {
   let sheetMock: GoogleAppsScript.Spreadsheet.Sheet;
@@ -23,10 +23,11 @@ describe('KvConfig', () => {
   });
 
   it('should construct KvConfig and read from sheet', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const kvConfig = new KvConfig('TestSheet');
     expect(spreadsheetAppMock.getActiveSpreadsheet).toHaveBeenCalled();
     expect(
-      spreadsheetAppMock.getActiveSpreadsheet().getSheetByName
+      spreadsheetAppMock.getActiveSpreadsheet().getSheetByName,
     ).toHaveBeenCalledWith('TestSheet');
   });
 
@@ -45,8 +46,8 @@ describe('KvConfig', () => {
     ];
     kvConfig['processSheetNamesBlock'](rows);
     expect(kvConfig.getSheetNames()).toEqual([
-      { sheetId: '1', sheetName: 'Sheet1' },
-      { sheetId: '2', sheetName: 'Sheet2' },
+      {sheetId: '1', sheetName: 'Sheet1'},
+      {sheetId: '2', sheetName: 'Sheet2'},
     ]);
   });
 
@@ -59,8 +60,8 @@ describe('KvConfig', () => {
     ];
     kvConfig['processSheetColumnNamesBlock'](rows);
     expect(kvConfig.getSheetColumnNames()).toEqual([
-      { sheetId: '1', colId: 'col1', colName: 'Column1' },
-      { sheetId: '1', colId: 'col2', colName: 'Column2' },
+      {sheetId: '1', colId: 'col1', colName: 'Column1'},
+      {sheetId: '1', colId: 'col2', colName: 'Column2'},
     ]);
   });
 
@@ -105,10 +106,11 @@ describe('KvConfig', () => {
     });
 
     it('should construct KvConfig and read from sheet', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const kvConfig = new KvConfig('TestSheet');
       expect(spreadsheetAppMock.getActiveSpreadsheet).toHaveBeenCalled();
       expect(
-        spreadsheetAppMock.getActiveSpreadsheet().getSheetByName
+        spreadsheetAppMock.getActiveSpreadsheet().getSheetByName,
       ).toHaveBeenCalledWith('TestSheet');
     });
 
@@ -127,8 +129,8 @@ describe('KvConfig', () => {
       ];
       kvConfig['processSheetNamesBlock'](rows);
       expect(kvConfig.getSheetNames()).toEqual([
-        { sheetId: '1', sheetName: 'Sheet1' },
-        { sheetId: '2', sheetName: 'Sheet2' },
+        {sheetId: '1', sheetName: 'Sheet1'},
+        {sheetId: '2', sheetName: 'Sheet2'},
       ]);
     });
 
@@ -141,8 +143,8 @@ describe('KvConfig', () => {
       ];
       kvConfig['processSheetColumnNamesBlock'](rows);
       expect(kvConfig.getSheetColumnNames()).toEqual([
-        { sheetId: '1', colId: 'col1', colName: 'Column1' },
-        { sheetId: '1', colId: 'col2', colName: 'Column2' },
+        {sheetId: '1', colId: 'col1', colName: 'Column1'},
+        {sheetId: '1', colId: 'col2', colName: 'Column2'},
       ]);
     });
 

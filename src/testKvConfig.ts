@@ -1,5 +1,6 @@
-import { KvConfig } from './KvConfig';
+import {KvConfig} from './KvConfig';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testKvConfig(): void {
   const kvConfig = new KvConfig('kv_config');
   const sheetNames = kvConfig.getSheetNames();
