@@ -18,7 +18,7 @@
     "rollup-plugin-license": "^3.6.0",
     "rollup-plugin-typescript2": "^0.37.0",
     "ts-jest": "^29.4.11",
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "clean": "rimraf build dist",
